@@ -8,10 +8,15 @@ int main()
     std::cout << "Test:" << std::endl;
 	
 	NeuralNetwork nn1;
+	if (nn1.decide())
+		std::cout << "Collaborates!" << std::endl;
+	else
+		std::cout << "Defects!" << std::endl;
+	
 	if (nn1.decide(2,3))
 		std::cout << "Collaborates!" << std::endl;
 	else
-		std::cout << "Defect!" << std::endl;
+		std::cout << "Defects!" << std::endl;
 
     return 0;
 }
