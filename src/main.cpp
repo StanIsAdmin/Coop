@@ -1,14 +1,21 @@
 #include "NeuralNetwork.hpp"
 
 #include <iostream>
+#include <cassert>
 
 
 int main()
 {
-    std::cout << "Test:" << std::endl;
-	
 	NeuralNetwork nn1;
-	std::cout << "Node count: " << nn1.getInnerNodeCount() << std::endl;
+	int cogNodes = nn1.getCognitiveNodeCount();
+	int conNodes = nn1.getContextNodeCount();
+	int innNodes = nn1.getInnerNodeCount();
+	
+	assert(cogNodes + conNodes == innNodes);
+	assert(innNodes <= MAXINITIALNODES);
+	assert(conNodes <= cogNodes);
+	
+	
 	if (nn1.decide())
 		std::cout << "Collaborates!" << std::endl;
 	else

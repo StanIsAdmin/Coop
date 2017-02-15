@@ -120,6 +120,14 @@ int NeuralNetwork::getInnerNodeCount()
 {
 	return context_node_count + cognitive_node_count;
 }
+int NeuralNetwork::getCognitiveNodeCount()
+{
+	return cognitive_node_count;
+}
+int NeuralNetwork::getContextNodeCount()
+{
+	return context_node_count;
+}
 
 bool NeuralNetwork::decide(payoff self, payoff other)
 {

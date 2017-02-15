@@ -71,6 +71,8 @@ class NeuralNetwork
 		bool decide(); //default decision (without input)
 		
 		int getInnerNodeCount(); //returns the number of inner nodes
+		int getCognitiveNodeCount();
+		int getContextNodeCount();
 };
 
 #endif // NEURALNETWORK_H
