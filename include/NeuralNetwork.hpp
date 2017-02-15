@@ -8,6 +8,7 @@
 
 #define MAXNODES 10
 #define MAXINITIALNODES 3
+#define MAXINITIALNUMVAL 1e10
 
 typedef unsigned short payoff;
 typedef double numval;
@@ -46,8 +47,11 @@ class NeuralNetwork
 		static std::uniform_int_distribution<int> distribution_bool;
 		static std::uniform_int_distribution<int> distribution_initial_nodes;
 		static std::uniform_real_distribution<numval> distribution_real_values;
+		static std::uniform_real_distribution<numval> distribution_prob_values;
 	
 		bool default_choice;
+		numval output_node_threshold;
+		
 		InnerNode* inner_nodes[MAXNODES];
 		numval link_weights_from_self_payoff[MAXNODES];
 		numval link_weights_from_other_payoff[MAXNODES];

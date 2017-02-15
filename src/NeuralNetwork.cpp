@@ -51,23 +51,27 @@ std::random_device NeuralNetwork::seed;
 std::default_random_engine NeuralNetwork::generator = std::default_random_engine(NeuralNetwork::seed());
 std::uniform_int_distribution<int> NeuralNetwork::distribution_bool = std::uniform_int_distribution<int>(0,1);
 std::uniform_int_distribution<int> NeuralNetwork::distribution_initial_nodes = std::uniform_int_distribution<int>(0,MAXINITIALNODES);
-std::uniform_real_distribution<numval> NeuralNetwork::distribution_real_values = std::uniform_real_distribution<numval>(std::numeric_limits<numval>::lowest(), std::numeric_limits<numval>::max());
+std::uniform_real_distribution<numval> NeuralNetwork::distribution_real_values = std::uniform_real_distribution<numval>(-MAXINITIALNUMVAL, MAXINITIALNUMVAL);
+std::uniform_real_distribution<numval> NeuralNetwork::distribution_prob_values = std::uniform_real_distribution<numval>(0, 1);
 
 /*Default constructor*/
 NeuralNetwork::NeuralNetwork():
 	default_choice(distribution_bool(generator)), //random bool
-	inner_nodes()
+	output_node_threshold(distribution_real_values(generator)), //random real value
+	inner_nodes() //nullptr array
 {
 	//Choose number of initial nodes
 	int initial_nodes = distribution_initial_nodes(generator);
 	for (int i=0; i<initial_nodes; ++i) {
 		addNode();
 	}
+	std::cout << "NUM " << std::numeric_limits<numval>::lowest() << std::endl;
 }
 
 /*Copy constructor*/
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	default_choice(nn.default_choice),
+	output_node_threshold(nn.output_node_threshold),
 	inner_nodes()
 {
 	for (int i=0; i<MAXNODES; ++i) {
@@ -93,6 +97,11 @@ void NeuralNetwork::addNode()
 		//Add cognitive node to the network (random threshold)
 		numval threshold_value = distribution_real_values(generator);
 		inner_nodes[cognitive_node_count] = new InnerNode(threshold_value);
+		
+		//Initialize link weights to and from node with random values
+		link_weights_from_self_payoff[cognitive_node_count] = distribution_real_values(generator);
+		link_weights_from_other_payoff[cognitive_node_count] = distribution_real_values(generator);
+		link_weights_from_inner_nodes[cognitive_node_count] = distribution_real_values(generator);
 		cognitive_node_count++;
 	}
 }
@@ -131,7 +140,21 @@ int NeuralNetwork::getContextNodeCount()
 
 bool NeuralNetwork::decide(payoff self, payoff other)
 {
-	return self > other;
+	//Use inner nodes to compute output
+	numval output = 0;
+	for (int i=0; i<cognitive_node_count; ++i) {
+		numval selfInput = self * link_weights_from_self_payoff[i];
+		numval otherInput = other * link_weights_from_other_payoff[i];
+		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
+		std::cout << "selfInput " << selfInput << std::endl;
+		std::cout << "otherInput " << otherInput << std::endl;
+		std::cout << "output " << output << std::endl;
+	}
+	//Squash output into collaboration probability
+	numval collaborate_prob = sigmoidalSquash(output, output_node_threshold);
+	
+	//If random prob < collaborate prob : collaborate
+	return distribution_prob_values(generator) < collaborate_prob;
 }
 
 bool NeuralNetwork::decide()
