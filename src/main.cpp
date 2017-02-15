@@ -17,8 +17,7 @@ int main()
 	assert(cogNodes + conNodes == innNodes);
 	assert(innNodes <= MAXINITIALNODES);
 	assert(conNodes <= cogNodes);
-	
-	std::cout << "Running tests...2" << std::endl;
+
 	///Node addition and removal
 	for (int i=0; i<MAXNODES*2-innNodes; ++i) {
 		nn.addNode();
@@ -27,12 +26,11 @@ int main()
 	assert(nn.getCognitiveNodeCount() == MAXNODES);
 	assert(nn.getContextNodeCount() == MAXNODES);
 	assert(nn.getInnerNodeCount() == 2*MAXNODES);
-	std::cout << "Running tests...3" << std::endl;
+	
 	for (int i=0; i<19; ++i) {
-		std::cout << "hey" << std::endl;
 		nn.removeNode();
 	}
-	std::cout << "Running tests...4" << std::endl;
+	
 	assert(nn.getCognitiveNodeCount() == 0);
 	assert(nn.getContextNodeCount() == 0);
 	

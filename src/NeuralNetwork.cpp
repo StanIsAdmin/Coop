@@ -133,38 +133,28 @@ void NeuralNetwork::addNode()
 
 void NeuralNetwork::removeNode()
 {
-	std::cout << "A" << std::endl;
 	if (cognitive_node_count == 0) //there are no nodes to remove
 		return;
-	std::cout << "B" << std::endl;
+	
 	//Choose if deleted node is cognitive or context node
 	bool isContextNode = false;
 	if (context_node_count > 0) isContextNode = distribution_bool(generator);
-	std::cout << "C" << std::endl;
+	
 	if (isContextNode){
-		std::cout << "D1" << std::endl;
 		//Remove context node from one cognitive node
-		std::cout << inner_nodes[context_node_count] << std::endl;
-		inner_nodes[context_node_count]->removeContextNode();
-		std::cout << "D1" << std::endl;
 		context_node_count--;
-		std::cout << "D1" << std::endl;
+		inner_nodes[context_node_count]->removeContextNode();
 	}
 	else {
-		std::cout << "D2" << std::endl;
-		//Remove cognitive node from the network
+		//If cognitive node has context node, uncount it
+		cognitive_node_count--;
 		if (inner_nodes[cognitive_node_count]->hasContextNode())
 			context_node_count--;
 		
-		std::cout << inner_nodes[cognitive_node_count] << std::endl;
+		//Remove cognitive node from the network
 		delete inner_nodes[cognitive_node_count];
-		std::cout << "D2" << std::endl;
 		inner_nodes[cognitive_node_count] = nullptr;
-		std::cout << "D2" << std::endl;
-		cognitive_node_count--;
-		std::cout << "D2" << std::endl;
 	}
-	std::cout << "E" << std::endl;
 }
 
 int NeuralNetwork::getInnerNodeCount()
