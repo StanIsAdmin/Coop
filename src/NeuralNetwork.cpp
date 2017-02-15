@@ -65,7 +65,6 @@ NeuralNetwork::NeuralNetwork():
 	for (int i=0; i<initial_nodes; ++i) {
 		addNode();
 	}
-	std::cout << "NUM " << std::numeric_limits<numval>::lowest() << std::endl;
 }
 
 /*Copy constructor*/
@@ -138,10 +137,10 @@ int NeuralNetwork::getContextNodeCount()
 	return context_node_count;
 }
 
-bool NeuralNetwork::decide(payoff self, payoff other)
+bool NeuralNetwork::operator()(payoff self, payoff other)
 {
 	//If there are no cognitive nodes, use default choice
-	if (cognitive_node_count == 0) return decide();
+	if (cognitive_node_count == 0) return (*this)();
 	
 	//Use inner nodes to compute output
 	numval output = 0;
@@ -157,7 +156,7 @@ bool NeuralNetwork::decide(payoff self, payoff other)
 	return distribution_prob_values(generator) < collaborate_prob;
 }
 
-bool NeuralNetwork::decide()
+bool NeuralNetwork::operator()()
 {
 	return default_choice;
 }

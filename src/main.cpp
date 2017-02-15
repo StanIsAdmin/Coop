@@ -16,12 +16,12 @@ int main()
 	assert(conNodes <= cogNodes);
 	
 	
-	if (nn1.decide())
+	if (nn1())
 		std::cout << "Collaborates!" << std::endl;
 	else
 		std::cout << "Defects!" << std::endl;
 	
-	if (nn1.decide(2,3))
+	if (nn1(2,3))
 		std::cout << "Collaborates!" << std::endl;
 	else
 		std::cout << "Defects!" << std::endl;

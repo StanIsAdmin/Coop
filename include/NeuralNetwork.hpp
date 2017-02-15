@@ -72,8 +72,8 @@ class NeuralNetwork
         //No need for destructors (for now)
 
 		/**Methods & Operators**/
-		bool decide(payoff self, payoff other); //decide whether to cooperate or defect
-		bool decide(); //default decision (without input)
+		bool operator()(payoff self, payoff other); //decide whether to cooperate or defect
+		bool operator()(); //default decision (without input)
 		
 		int getInnerNodeCount(); //returns the number of inner nodes
 		int getCognitiveNodeCount();
