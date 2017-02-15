@@ -6,25 +6,52 @@
 
 int main()
 {
-	NeuralNetwork nn1;
-	int cogNodes = nn1.getCognitiveNodeCount();
-	int conNodes = nn1.getContextNodeCount();
-	int innNodes = nn1.getInnerNodeCount();
+	std::cout << "Running tests..." << std::endl;
+	
+	///Construction & initial nodes
+	NeuralNetwork nn;
+	int cogNodes = nn.getCognitiveNodeCount();
+	int conNodes = nn.getContextNodeCount();
+	int innNodes = nn.getInnerNodeCount();
 	
 	assert(cogNodes + conNodes == innNodes);
 	assert(innNodes <= MAXINITIALNODES);
 	assert(conNodes <= cogNodes);
 	
+	std::cout << "Running tests...2" << std::endl;
+	///Node addition and removal
+	for (int i=0; i<MAXNODES*2-innNodes; ++i) {
+		nn.addNode();
+	}
 	
-	if (nn1())
-		std::cout << "Collaborates!" << std::endl;
-	else
-		std::cout << "Defects!" << std::endl;
+	assert(nn.getCognitiveNodeCount() == MAXNODES);
+	assert(nn.getContextNodeCount() == MAXNODES);
+	assert(nn.getInnerNodeCount() == 2*MAXNODES);
+	std::cout << "Running tests...3" << std::endl;
+	for (int i=0; i<19; ++i) {
+		std::cout << "hey" << std::endl;
+		nn.removeNode();
+	}
+	std::cout << "Running tests...4" << std::endl;
+	assert(nn.getCognitiveNodeCount() == 0);
+	assert(nn.getContextNodeCount() == 0);
 	
-	if (nn1(2,3))
-		std::cout << "Collaborates!" << std::endl;
-	else
-		std::cout << "Defects!" << std::endl;
+	///Randomness of collaborate/defect
+	int defaultCollab = 0;
+	int otherCollab = 0;
+	for (int i=0; i<1000; ++i) {
+		NeuralNetwork nni;
+		if (nni())
+			defaultCollab++;
+		
+		if (nni(1,1))
+			otherCollab++;
+	}
+	//There's one chance in a million that 1000 coin tosses result in 575 or more heads/tails
+	assert(defaultCollab < 575); 
+	assert(otherCollab < 575);
+	
+	std::cout << "All tests passed!" << std::endl;
 
     return 0;
 }
