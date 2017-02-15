@@ -8,7 +8,8 @@
 
 #define MAXNODES 10
 #define MAXINITIALNODES 3
-#define MAXINITIALNUMVAL 1e10
+#define NUMVAL_MEAN 0
+#define NUMVAL_STDDEV 0.5
 
 typedef unsigned short payoff;
 typedef double numval;
@@ -46,7 +47,7 @@ class NeuralNetwork
 		static std::default_random_engine generator;
 		static std::uniform_int_distribution<int> distribution_bool;
 		static std::uniform_int_distribution<int> distribution_initial_nodes;
-		static std::uniform_real_distribution<numval> distribution_real_values;
+		static std::normal_distribution<numval> distribution_real_values;
 		static std::uniform_real_distribution<numval> distribution_prob_values;
 	
 		bool default_choice;

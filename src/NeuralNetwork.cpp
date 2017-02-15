@@ -51,7 +51,7 @@ std::random_device NeuralNetwork::seed;
 std::default_random_engine NeuralNetwork::generator = std::default_random_engine(NeuralNetwork::seed());
 std::uniform_int_distribution<int> NeuralNetwork::distribution_bool = std::uniform_int_distribution<int>(0,1);
 std::uniform_int_distribution<int> NeuralNetwork::distribution_initial_nodes = std::uniform_int_distribution<int>(0,MAXINITIALNODES);
-std::uniform_real_distribution<numval> NeuralNetwork::distribution_real_values = std::uniform_real_distribution<numval>(-MAXINITIALNUMVAL, MAXINITIALNUMVAL);
+std::normal_distribution<numval> NeuralNetwork::distribution_real_values = std::normal_distribution<numval>(NUMVAL_MEAN, NUMVAL_STDDEV);
 std::uniform_real_distribution<numval> NeuralNetwork::distribution_prob_values = std::uniform_real_distribution<numval>(0, 1);
 
 /*Default constructor*/
@@ -140,15 +140,15 @@ int NeuralNetwork::getContextNodeCount()
 
 bool NeuralNetwork::decide(payoff self, payoff other)
 {
+	//If there are no cognitive nodes, use default choice
+	if (cognitive_node_count == 0) return decide();
+	
 	//Use inner nodes to compute output
 	numval output = 0;
 	for (int i=0; i<cognitive_node_count; ++i) {
 		numval selfInput = self * link_weights_from_self_payoff[i];
 		numval otherInput = other * link_weights_from_other_payoff[i];
 		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
-		std::cout << "selfInput " << selfInput << std::endl;
-		std::cout << "otherInput " << otherInput << std::endl;
-		std::cout << "output " << output << std::endl;
 	}
 	//Squash output into collaboration probability
 	numval collaborate_prob = sigmoidalSquash(output, output_node_threshold);
