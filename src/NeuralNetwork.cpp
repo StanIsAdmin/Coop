@@ -44,6 +44,7 @@ numval InnerNode::operator()(numval input)
 	else {
 		input = sigmoidalSquash(input, threshold_value);
 	}
+	assert(input >= 0 and input <= 1);
 	return input;
 }
 
@@ -73,6 +74,8 @@ NeuralNetwork::NeuralNetwork():
 	for (int i=0; i<initial_nodes; ++i) {
 		addNode();
 	}
+	assert(getInnerNodeCount() == initial_nodes);
+	assert(initial_nodes >= 0 and initial_nodes <= MAXINITIALNODES);
 }
 
 /*Copy constructor*/

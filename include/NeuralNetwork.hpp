@@ -1,10 +1,13 @@
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
 
+// #define NDEBUG //TODO: use in release version
+
 #include <random>
 #include <cmath>
 #include <limits>
 #include <iostream>
+#include <cassert>
 
 #define MAXNODES 10
 #define MAXINITIALNODES 3

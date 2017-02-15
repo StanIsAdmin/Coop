@@ -27,8 +27,9 @@ int main()
 	assert(nn.getContextNodeCount() == MAXNODES);
 	assert(nn.getInnerNodeCount() == 2*MAXNODES);
 	
-	for (int i=0; i<19; ++i) {
+	for (int i=0; i<20; ++i) {
 		nn.removeNode();
+		assert(nn.getCognitiveNodeCount() >= nn.getContextNodeCount());
 	}
 	
 	assert(nn.getCognitiveNodeCount() == 0);
@@ -50,6 +51,6 @@ int main()
 	assert(otherCollab < 575);
 	
 	std::cout << "All tests passed!" << std::endl;
-
+	
     return 0;
 }
