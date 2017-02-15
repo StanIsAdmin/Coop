@@ -75,6 +75,11 @@ class NeuralNetwork
 		///Constructors
         NeuralNetwork(); //trivial
         NeuralNetwork(const NeuralNetwork&); //copy
+		NeuralNetwork(NeuralNetwork&&) = default; //move
+		
+		///Assignments
+		NeuralNetwork& operator=(const NeuralNetwork&) = delete; 
+		NeuralNetwork& operator=(NeuralNetwork&&) = delete; 
 
         ///Destructors
         ~NeuralNetwork(); //deletes InnerNode objects
