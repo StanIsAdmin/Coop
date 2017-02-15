@@ -8,6 +8,7 @@ int main()
     std::cout << "Test:" << std::endl;
 	
 	NeuralNetwork nn1;
+	std::cout << "Node count: " << nn1.getInnerNodeCount() << std::endl;
 	if (nn1.decide())
 		std::cout << "Collaborates!" << std::endl;
 	else
