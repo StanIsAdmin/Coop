@@ -35,6 +35,8 @@ int main()
 	assert(nn.getCognitiveNodeCount() == 0);
 	assert(nn.getContextNodeCount() == 0);
 	
+	nn.mutate();
+	
 	///Randomness of collaborate/defect
 	int defaultCollab = 0;
 	int otherCollab = 0;

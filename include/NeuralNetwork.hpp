@@ -25,6 +25,8 @@ numval sigmoidalSquash(numval value, numval threshold);
 /* Represents a cognitive node that may or may not be attached to a context node */
 class InnerNode
 {
+	friend class NeuralNetwork;
+	
 	private:
 		bool has_context_node = false; //is a context node attached ?
 		numval context_value = 0; //the context value acts as a memory
@@ -58,6 +60,10 @@ class NeuralNetwork
 		//normal distribution (mean = NUMVAL_MEAN, std deviation = NUMVAL_STDDEV)
 		static std::normal_distribution<numval> distribution_real_values; 
 		static std::uniform_real_distribution<numval> distribution_prob_values; //0 to 1
+		
+		///Probabilities
+		static constexpr numval value_mutation_prob = 0.02;
+		static constexpr numval network_mutation_prob = 0.01;
 	
 		///Neural network structure
 		bool collaborate_by_default; //used for decision-making in first round
@@ -87,6 +93,8 @@ class NeuralNetwork
 		/**Methods & Operators**/
 		void addNode(); //adds a node to the structure if possible
 		void removeNode(); //removes a node from the structure if possible
+		
+		void mutate(); //implements all specified mutations with given random probabilities
 		
 		int getInnerNodeCount();
 		int getCognitiveNodeCount();

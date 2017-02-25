@@ -160,6 +160,47 @@ void NeuralNetwork::removeNode()
 	}
 }
 
+void NeuralNetwork::mutate()
+{
+	///Modify numeric values
+	for (int i=0; i<cognitive_node_count; i++) {
+		///Link weights
+		//From self payoff to inner nodes
+		if (distribution_prob_values(generator) < value_mutation_prob) {
+			link_weights_from_self_payoff[i] += distribution_real_values(generator);
+		}
+		//From other payoff to inner nodes
+		if (distribution_prob_values(generator) < value_mutation_prob) {
+			link_weights_from_other_payoff[i] += distribution_real_values(generator);
+		}
+		//From inner nodes to output
+		if (distribution_prob_values(generator) < value_mutation_prob) {
+			link_weights_from_inner_nodes[i] += distribution_real_values(generator);
+		}
+		//From context nodes to cognitive nodes
+		if (distribution_prob_values(generator) < value_mutation_prob) {
+			inner_nodes[i]->context_link_weight += distribution_real_values(generator);
+		}
+		
+		///Node thresholds
+		//Cognitive nodes
+		if (distribution_prob_values(generator) < value_mutation_prob) {
+			inner_nodes[i]->threshold_value += distribution_real_values(generator);
+		}
+	}
+	
+	//Output node threshold
+	if (distribution_prob_values(generator) < value_mutation_prob) {
+		output_node_threshold += distribution_real_values(generator);
+	}
+	
+	///Network structure
+	if (distribution_prob_values(generator) < network_mutation_prob) {
+		if (distribution_bool(generator)) addNode();
+		else removeNode();
+	}
+}
+
 int NeuralNetwork::getInnerNodeCount()
 {
 	return context_node_count + cognitive_node_count;
