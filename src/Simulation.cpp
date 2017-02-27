@@ -1,7 +1,17 @@
 #include "Simulation.hpp"
 
 
-void simulate() 
+Simulation::Simulation():
+	population()
 {
-	std::cout << "Simulating...done!" << std::endl;
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population[i] = new NeuralNetwork();
+	}
+}
+
+void Simulation::run(unsigned int rounds)
+{
+	for (unsigned int round_count=0; round_count<rounds; ++round_count) {
+		population[0]->mutate();
+	}
 }
