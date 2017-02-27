@@ -1,10 +1,6 @@
-#include "NeuralNetwork.hpp"
+#include "NeuralNetworkTest.hpp"
 
-#include <iostream>
-#include <cassert>
-
-
-int main()
+void test()
 {
 	std::cout << "Running tests..." << std::endl;
 	
@@ -53,6 +49,4 @@ int main()
 	assert(otherCollab < 575);
 	
 	std::cout << "All tests passed!" << std::endl;
-	
-    return 0;
 }
