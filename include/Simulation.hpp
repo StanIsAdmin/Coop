@@ -6,6 +6,8 @@
 #include <iostream>
 
 #define POPULATION_SIZE 50
+#define ROUND_ITERATIONS_STOP_COUNT 1
+#define ROUND_ITERATIONS_MEAN_PROB 0.98
 
 struct GamePayoffs {
 	payoff both_collaborate = 0;
@@ -17,12 +19,22 @@ struct GamePayoffs {
 class Simulation
 {
 	private:
-		NeuralNetwork* population[POPULATION_SIZE];
-		const GamePayoffs& payoffs;
+		///Randomness
+		static std::random_device generator; //random number generator TODO: check efficiency
+		//number of iterations per round
+		static std::negative_binomial_distribution<int> distribution_iterations;
 		
+		NeuralNetwork* population[POPULATION_SIZE];
+		unsigned long long population_payoff_sum[POPULATION_SIZE];
+		unsigned long long population_game_count[POPULATION_SIZE];
+		
+		const GamePayoffs& game_payoffs;
+		
+		//translate individual's decision into payoffs according to game rules
 		void payoffsFromChoices(bool playerACoops, bool playerBCoops, payoff& playerAPayoff, payoff& playerBPayoff);
-		void playGeneration();
-		void playRound(int playerAIndex, int playerBIndex);
+		
+		void playGeneration(); //play all games for the entire generation
+		void playRound(int playerAIndex, int playerBIndex); //play a full round between two players
 		
 	public:
 		Simulation(const GamePayoffs& payoffs);
