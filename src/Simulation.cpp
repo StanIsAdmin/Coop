@@ -85,3 +85,26 @@ void Simulation::playRound(int playerAIndex, int playerBIndex)
 	population_game_count[playerAIndex] += round_iterations;
 	population_game_count[playerBIndex] += round_iterations;
 }
+
+void Simulation::nextGeneration()
+{
+	std::array<double, POPULATION_SIZE> population_fitness;
+	
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
+	}
+	
+	std::discrete_distribution<int> distribution_population(population_fitness.begin(), population_fitness.end());
+	
+	NeuralNetwork* new_population[POPULATION_SIZE];
+	int selected_index;
+	
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		selected_index = distribution_population(generator);
+		new_population[i] = new NeuralNetwork(*(population[selected_index]));
+	}
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		delete population[i];
+		population[i] = new_population[i];
+	}
+}

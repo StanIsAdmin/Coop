@@ -3,11 +3,13 @@
 
 #include "NeuralNetwork.hpp"
 
+#include <array>
 #include <iostream>
 
 #define POPULATION_SIZE 50
 #define ROUND_ITERATIONS_STOP_COUNT 1
 #define ROUND_ITERATIONS_MEAN_PROB 0.98
+#define NODE_FITNESS_PENALTY 0.01
 
 struct GamePayoffs {
 	payoff both_collaborate = 0;
@@ -36,6 +38,7 @@ class Simulation
 		void playGeneration(); //play all games for the entire generation
 		void playRound(int playerAIndex, int playerBIndex); //play a full round between two players
 		
+		void nextGeneration(); //replaces the current generation by the next one
 	public:
 		Simulation(const GamePayoffs& payoffs);
 		
