@@ -8,10 +8,10 @@
 #define POPULATION_SIZE 50
 
 struct GamePayoffs {
-	int both_collaborate = 0;
-	int both_defect = 0;
-	int self_collaborates_other_defects = 0;
-	int self_defects_other_collaborates = 0;
+	payoff both_collaborate = 0;
+	payoff both_defect = 0;
+	payoff self_collaborates_other_defects = 0;
+	payoff self_defects_other_collaborates = 0;
 };
 
 class Simulation
@@ -20,11 +20,15 @@ class Simulation
 		NeuralNetwork* population[POPULATION_SIZE];
 		const GamePayoffs& payoffs;
 		
+		void payoffsFromChoices(bool playerACoops, bool playerBCoops, payoff& playerAPayoff, payoff& playerBPayoff);
+		void playGeneration();
+		void playRound(int playerAIndex, int playerBIndex);
+		
 	public:
 		Simulation(const GamePayoffs& payoffs);
 		
-		//run the simulation for n rounds
-		void run(unsigned int rounds);
+		//run the simulation for n generations
+		void run(unsigned int generations);
 };
 
 #endif // SIMULATION_H
