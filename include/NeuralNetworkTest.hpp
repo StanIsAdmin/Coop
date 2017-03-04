@@ -6,6 +6,6 @@
 #include <iostream>
 #include <cassert>
 
-void test();
+void testNeuralNetwork();
 
 #endif // NEURALNETWORKTEST_H

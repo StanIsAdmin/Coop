@@ -1,6 +1,6 @@
 #include "NeuralNetworkTest.hpp"
 
-void test()
+void testNeuralNetwork()
 {
 	std::cout << "Running tests..." << std::endl;
 	
