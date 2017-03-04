@@ -106,5 +106,6 @@ void Simulation::nextGeneration()
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		delete population[i];
 		population[i] = new_population[i];
+		population[i]->mutate();
 	}
 }
