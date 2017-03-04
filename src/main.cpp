@@ -39,17 +39,17 @@ void runSimulation(int sim_rounds, std::string game_type)
 	
 	//Iterated Prisoner's Game
 	if (game_type == "IPD") {
-		sim_payoffs.both_cooperate = 1;
+		sim_payoffs.both_cooperate = 6;
 		sim_payoffs.both_defect = 2;
-		sim_payoffs.self_cooperates_other_defects = 3;
-		sim_payoffs.self_defects_other_cooperates = 4;
+		sim_payoffs.self_defects_other_cooperates = 7;
+		sim_payoffs.self_cooperates_other_defects = 1;
 	}
 	//Iterated Snowdrift Game
 	else if (game_type == "ISD") {
-		sim_payoffs.both_cooperate = 1;
-		sim_payoffs.both_defect = 2;
-		sim_payoffs.self_cooperates_other_defects = 3;
-		sim_payoffs.self_defects_other_cooperates = 4;
+		sim_payoffs.both_cooperate = 5;
+		sim_payoffs.both_defect = 1;
+		sim_payoffs.self_defects_other_cooperates = 8;
+		sim_payoffs.self_cooperates_other_defects = 2;
 	}
 	else {
 		std::cout << "Error: unknown game" << std::endl;
