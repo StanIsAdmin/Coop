@@ -23,18 +23,18 @@ int main(int argc, char** argv)
 		//Iterated Prisoner's Game
 		if (std::string(argv[3]) == "IPD") {
 			std::cout << "Game: IPD" << std::endl;
-			sim_payoffs.both_collaborate = 1;
+			sim_payoffs.both_cooperate = 1;
 			sim_payoffs.both_defect = 2;
-			sim_payoffs.self_collaborates_other_defects = 3;
-			sim_payoffs.self_defects_other_collaborates = 4;
+			sim_payoffs.self_cooperates_other_defects = 3;
+			sim_payoffs.self_defects_other_cooperates = 4;
 		}
 		//Iterated Snowdrift Game
 		else if (std::string(argv[3]) == "ISD") {
 			std::cout << "Game: ISD" << std::endl;
-			sim_payoffs.both_collaborate = 1;
+			sim_payoffs.both_cooperate = 1;
 			sim_payoffs.both_defect = 2;
-			sim_payoffs.self_collaborates_other_defects = 3;
-			sim_payoffs.self_defects_other_collaborates = 4;
+			sim_payoffs.self_cooperates_other_defects = 3;
+			sim_payoffs.self_defects_other_cooperates = 4;
 		}
 		else {
 			std::cout << "Error: unknown game" << std::endl;

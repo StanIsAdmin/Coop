@@ -22,7 +22,7 @@ typedef double numval;
 numval sigmoidalSquash(numval value, numval threshold);
 
 
-/* Represents a cognitive node that may or may not be attached to a context node */
+/*Represents a cognitive node that may or may not be attached to a context node*/
 class InnerNode
 {
 	friend class NeuralNetwork;
@@ -66,7 +66,7 @@ class NeuralNetwork
 		static constexpr numval network_mutation_prob = 0.01;
 	
 		///Neural network structure
-		bool collaborate_by_default; //used for decision-making in first round
+		bool cooperate_by_default; //used for decision-making in first round
 		numval output_node_threshold; //same use as inner nodes thresholds
 		
 		InnerNode* inner_nodes[MAXNODES]; //Neural network's hidden layer nodes

@@ -33,7 +33,7 @@ void test()
 	
 	nn.mutate();
 	
-	///Randomness of collaborate/defect
+	///Randomness of cooperate/defect
 	int defaultCollab = 0;
 	int otherCollab = 0;
 	for (int i=0; i<1000; ++i) {

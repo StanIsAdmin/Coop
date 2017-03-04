@@ -65,7 +65,7 @@ std::uniform_real_distribution<numval> NeuralNetwork::distribution_prob_values =
 
 /*Default constructor*/
 NeuralNetwork::NeuralNetwork():
-	collaborate_by_default(distribution_bool(generator)), //random bool
+	cooperate_by_default(distribution_bool(generator)), //random bool
 	output_node_threshold(distribution_real_values(generator)), //random real value
 	inner_nodes() //nullptr array
 {
@@ -80,7 +80,7 @@ NeuralNetwork::NeuralNetwork():
 
 /*Copy constructor*/
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
-	collaborate_by_default(nn.collaborate_by_default),
+	cooperate_by_default(nn.cooperate_by_default),
 	output_node_threshold(nn.output_node_threshold),
 	inner_nodes()
 {
@@ -228,14 +228,14 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
 	}
 	//Squash output into collaboration probability
-	numval collaborate_prob = sigmoidalSquash(output, output_node_threshold);
+	numval cooperate_prob = sigmoidalSquash(output, output_node_threshold);
 	
-	//If random prob < collaborate prob : collaborate
-	return distribution_prob_values(generator) < collaborate_prob;
+	//If random prob < cooperate prob : cooperate
+	return distribution_prob_values(generator) < cooperate_prob;
 }
 
 /*Returns true if it chooses to cooperate by default, false otherwise*/
 bool NeuralNetwork::operator()()
 {
-	return collaborate_by_default;
+	return cooperate_by_default;
 }
