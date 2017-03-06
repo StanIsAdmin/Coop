@@ -1,12 +1,8 @@
 #include "Simulation.hpp"
 
+
 /*Static members*/
-std::random_device Simulation::generator;
-
-//pascal distribution with prob. ROUND_ITERATIONS_MEAN_PROB, gives number of round iterations
-std::negative_binomial_distribution<int> Simulation::distribution_iterations = std::negative_binomial_distribution<int>(ROUND_ITERATIONS_STOP_COUNT, ROUND_ITERATIONS_MEAN_PROB);
-
-
+RNG Simulation::rng = RNG();
 
 Simulation::Simulation(const GamePayoffs& payoffs):
 	population(), //nullptr array
@@ -81,7 +77,7 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 	bool playerB_cooperates = playerB();
 	
 	//Play a random number of iterations (mean is 50)
-	int round_iterations = distribution_iterations(generator);
+	int round_iterations = rng.getIterationCount();
 	
 	for (int iteration=0; iteration<round_iterations; ++iteration) {
 		//Gather payoffs from individual's decisions
@@ -119,7 +115,7 @@ void Simulation::nextGeneration()
 	int selected_index;
 	
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		selected_index = distribution_population(generator); //choose an index
+		selected_index = distribution_population(rng.generator); //choose an index
 		new_population[i] = new NeuralNetwork(*(population[selected_index])); //copy the NN
 	}
 	

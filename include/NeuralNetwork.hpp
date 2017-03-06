@@ -9,14 +9,12 @@
 #include <iostream>
 #include <cassert>
 
+#include "Rng.hpp"
+
 #define MAXNODES 10
-#define MAXINITIALNODES 3
-#define NUMVAL_MEAN 0
-#define NUMVAL_STDDEV 0.5
 
 typedef unsigned short payoff;
 typedef double numval;
-
 
 /*Squashing function used by cognitive and output nodes*/
 numval sigmoidalSquash(numval value, numval threshold);
@@ -51,15 +49,10 @@ class InnerNode
 
 /* Represents a complete neural network with up to 10 cognitive and 10 context nodes*/
 class NeuralNetwork
-{
+{	
 	private:
 		///Randomness
-		static std::random_device generator; //random number generator TODO: check efficiency
-		static std::uniform_int_distribution<int> distribution_bool; //0 or 1
-		static std::uniform_int_distribution<int> distribution_initial_nodes; //0 to MAXINITIALNODES
-		//normal distribution (mean = NUMVAL_MEAN, std deviation = NUMVAL_STDDEV)
-		static std::normal_distribution<numval> distribution_real_values; 
-		static std::uniform_real_distribution<numval> distribution_prob_values; //0 to 1
+		static RNG rng; //random number generator
 		
 		///Probabilities
 		static constexpr numval value_mutation_prob = 0.02;
@@ -79,7 +72,7 @@ class NeuralNetwork
 	
 	public:
 		///Constructors
-        NeuralNetwork(); //trivial
+        NeuralNetwork(); //trivial ctr
         NeuralNetwork(const NeuralNetwork&); //copy
 		NeuralNetwork(NeuralNetwork&&) = default; //move
 		

@@ -1,14 +1,14 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
-#include "NeuralNetwork.hpp"
-
 #include <array>
 #include <iostream>
+#include <random>
+
+#include "NeuralNetwork.hpp"
+#include "Rng.hpp"
 
 #define POPULATION_SIZE 50
-#define ROUND_ITERATIONS_STOP_COUNT 1
-#define ROUND_ITERATIONS_MEAN_PROB 0.98
 #define NODE_FITNESS_PENALTY 0.01
 
 /*Contains the payoffs for each possible outcome of a game*/
@@ -24,9 +24,7 @@ class Simulation
 {
 	private:
 		///Randomness
-		static std::random_device generator; //random number generator TODO: check efficiency
-		//number of iterations per round
-		static std::negative_binomial_distribution<int> distribution_iterations;
+		static RNG rng; //random number generator
 		
 		///Population
 		NeuralNetwork* population[POPULATION_SIZE]; //dynamically allocated NNs
