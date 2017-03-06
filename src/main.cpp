@@ -1,58 +1,64 @@
 #include "NeuralNetwork.hpp"
+#include "NeuralNetworkTest.hpp"
+#include "Simulation.hpp"
 
 #include <iostream>
-#include <cassert>
+#include <cstring>
 
+void runTests();
+void runSimulation(int sim_rounds, std::string game_type);
 
-int main()
+int main(int argc, char** argv)
 {
-	std::cout << "Running tests..." << std::endl;
+	if (argc == 1) {
+		std::cout << "Error: no args provided" << std::endl;
+		return 1;
+	}
+	else if (std::string(argv[1]) == "test" and argc == 2) {
+		runTests();
+	}
+	else if (std::string(argv[1]) == "run" and argc == 4) {
+		runSimulation(atoi(argv[2]), std::string(argv[3]));		
+	}
+	else {
+		std::cout << "Error: unknown options" << std::endl;
+		return 1;
+	}
 	
-	///Construction & initial nodes
-	NeuralNetwork nn;
-	int cogNodes = nn.getCognitiveNodeCount();
-	int conNodes = nn.getContextNodeCount();
-	int innNodes = nn.getInnerNodeCount();
-	
-	assert(cogNodes + conNodes == innNodes);
-	assert(innNodes <= MAXINITIALNODES);
-	assert(conNodes <= cogNodes);
+	return 0;
+}
 
-	///Node addition and removal
-	for (int i=0; i<MAXNODES*2-innNodes; ++i) {
-		nn.addNode();
+void runTests()
+{
+	testNeuralNetwork();
+}
+
+void runSimulation(int sim_rounds, std::string game_type)
+{	
+	GamePayoffs sim_payoffs{};
+	
+	//Iterated Prisoner's Game
+	if (game_type == "IPD") {
+		sim_payoffs.both_cooperate = 6;
+		sim_payoffs.both_defect = 2;
+		sim_payoffs.self_defects_other_cooperates = 7;
+		sim_payoffs.self_cooperates_other_defects = 1;
+	}
+	//Iterated Snowdrift Game
+	else if (game_type == "ISD") {
+		sim_payoffs.both_cooperate = 5;
+		sim_payoffs.both_defect = 1;
+		sim_payoffs.self_defects_other_cooperates = 8;
+		sim_payoffs.self_cooperates_other_defects = 2;
+	}
+	else {
+		std::cout << "Error: unknown game" << std::endl;
+		return;
 	}
 	
-	assert(nn.getCognitiveNodeCount() == MAXNODES);
-	assert(nn.getContextNodeCount() == MAXNODES);
-	assert(nn.getInnerNodeCount() == 2*MAXNODES);
+	std::cout << "Rounds: " << sim_rounds << std::endl;
+	std::cout << "Game: " << game_type << std::endl;
 	
-	for (int i=0; i<20; ++i) {
-		nn.removeNode();
-		assert(nn.getCognitiveNodeCount() >= nn.getContextNodeCount());
-	}
-	
-	assert(nn.getCognitiveNodeCount() == 0);
-	assert(nn.getContextNodeCount() == 0);
-	
-	nn.mutate();
-	
-	///Randomness of collaborate/defect
-	int defaultCollab = 0;
-	int otherCollab = 0;
-	for (int i=0; i<1000; ++i) {
-		NeuralNetwork nni;
-		if (nni())
-			defaultCollab++;
-		
-		if (nni(1,1))
-			otherCollab++;
-	}
-	//There's one chance in a million that 1000 coin tosses result in 575 or more heads/tails
-	assert(defaultCollab < 575); 
-	assert(otherCollab < 575);
-	
-	std::cout << "All tests passed!" << std::endl;
-	
-    return 0;
+	Simulation sim = Simulation(sim_payoffs);
+	sim.run(sim_rounds);
 }

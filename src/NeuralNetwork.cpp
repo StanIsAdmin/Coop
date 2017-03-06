@@ -52,25 +52,16 @@ numval InnerNode::operator()(numval input)
 /**-------------------- NeuralNetwork**/
 
 /*Static members*/
-std::random_device NeuralNetwork::generator;
-
-std::uniform_int_distribution<int> NeuralNetwork::distribution_bool = 
-	std::uniform_int_distribution<int>(0,1);
-std::uniform_int_distribution<int> NeuralNetwork::distribution_initial_nodes = 
-	std::uniform_int_distribution<int>(0,MAXINITIALNODES);
-std::normal_distribution<numval> NeuralNetwork::distribution_real_values = 
-	std::normal_distribution<numval>(NUMVAL_MEAN, NUMVAL_STDDEV);
-std::uniform_real_distribution<numval> NeuralNetwork::distribution_prob_values = 
-	std::uniform_real_distribution<numval>(0, 1);
+RNG NeuralNetwork::rng = RNG();
 
 /*Default constructor*/
 NeuralNetwork::NeuralNetwork():
-	collaborate_by_default(distribution_bool(generator)), //random bool
-	output_node_threshold(distribution_real_values(generator)), //random real value
+	cooperate_by_default(rng.getRandomBool()), //random bool
+	output_node_threshold(rng.getRandomNumval()), //random real value
 	inner_nodes() //nullptr array
 {
 	//Choose number of initial nodes
-	int initial_nodes = distribution_initial_nodes(generator);
+	int initial_nodes = rng.getInitialNodeCount();
 	for (int i=0; i<initial_nodes; ++i) {
 		addNode();
 	}
@@ -80,7 +71,7 @@ NeuralNetwork::NeuralNetwork():
 
 /*Copy constructor*/
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
-	collaborate_by_default(nn.collaborate_by_default),
+	cooperate_by_default(nn.cooperate_by_default),
 	output_node_threshold(nn.output_node_threshold),
 	inner_nodes()
 {
@@ -112,24 +103,24 @@ void NeuralNetwork::addNode()
 	else if (context_node_count == cognitive_node_count) //Can't add context node
 		isContextNode = false;
 	else
-		isContextNode = distribution_bool(generator);
+		isContextNode = rng.getRandomBool();
 	
 	if (isContextNode){
 		//Add context node to one cognitive node (random context value and link weight)
-		numval context_value = distribution_real_values(generator);
-		numval link_weight = distribution_real_values(generator);
+		numval context_value = rng.getRandomNumval();
+		numval link_weight = rng.getRandomNumval();
 		inner_nodes[context_node_count]->setContextNode(context_value, link_weight);
 		context_node_count++;
 	}
 	else {
 		//Add cognitive node to the network (random threshold)
-		numval threshold_value = distribution_real_values(generator);
+		numval threshold_value = rng.getRandomNumval();
 		inner_nodes[cognitive_node_count] = new InnerNode(threshold_value);
 		
 		//Initialize link weights to and from node with random values
-		link_weights_from_self_payoff[cognitive_node_count] = distribution_real_values(generator);
-		link_weights_from_other_payoff[cognitive_node_count] = distribution_real_values(generator);
-		link_weights_from_inner_nodes[cognitive_node_count] = distribution_real_values(generator);
+		link_weights_from_self_payoff[cognitive_node_count] = rng.getRandomNumval();
+		link_weights_from_other_payoff[cognitive_node_count] = rng.getRandomNumval();
+		link_weights_from_inner_nodes[cognitive_node_count] = rng.getRandomNumval();
 		cognitive_node_count++;
 	}
 }
@@ -141,7 +132,7 @@ void NeuralNetwork::removeNode()
 	
 	//Choose if deleted node is cognitive or context node
 	bool isContextNode = false;
-	if (context_node_count > 0) isContextNode = distribution_bool(generator);
+	if (context_node_count > 0) isContextNode = rng.getRandomBool();
 	
 	if (isContextNode){
 		//Remove context node from one cognitive node
@@ -166,37 +157,37 @@ void NeuralNetwork::mutate()
 	for (int i=0; i<cognitive_node_count; i++) {
 		///Link weights
 		//From self payoff to inner nodes
-		if (distribution_prob_values(generator) < value_mutation_prob) {
-			link_weights_from_self_payoff[i] += distribution_real_values(generator);
+		if (rng.getRandomProbability() < value_mutation_prob) {
+			link_weights_from_self_payoff[i] += rng.getRandomNumval();
 		}
 		//From other payoff to inner nodes
-		if (distribution_prob_values(generator) < value_mutation_prob) {
-			link_weights_from_other_payoff[i] += distribution_real_values(generator);
+		if (rng.getRandomProbability() < value_mutation_prob) {
+			link_weights_from_other_payoff[i] += rng.getRandomNumval();
 		}
 		//From inner nodes to output
-		if (distribution_prob_values(generator) < value_mutation_prob) {
-			link_weights_from_inner_nodes[i] += distribution_real_values(generator);
+		if (rng.getRandomProbability() < value_mutation_prob) {
+			link_weights_from_inner_nodes[i] += rng.getRandomNumval();
 		}
 		//From context nodes to cognitive nodes
-		if (distribution_prob_values(generator) < value_mutation_prob) {
-			inner_nodes[i]->context_link_weight += distribution_real_values(generator);
+		if (rng.getRandomProbability() < value_mutation_prob) {
+			inner_nodes[i]->context_link_weight += rng.getRandomNumval();
 		}
 		
 		///Node thresholds
 		//Cognitive nodes
-		if (distribution_prob_values(generator) < value_mutation_prob) {
-			inner_nodes[i]->threshold_value += distribution_real_values(generator);
+		if (rng.getRandomProbability() < value_mutation_prob) {
+			inner_nodes[i]->threshold_value += rng.getRandomNumval();
 		}
 	}
 	
 	//Output node threshold
-	if (distribution_prob_values(generator) < value_mutation_prob) {
-		output_node_threshold += distribution_real_values(generator);
+	if (rng.getRandomProbability() < value_mutation_prob) {
+		output_node_threshold += rng.getRandomNumval();
 	}
 	
 	///Network structure
-	if (distribution_prob_values(generator) < network_mutation_prob) {
-		if (distribution_bool(generator)) addNode();
+	if (rng.getRandomProbability() < network_mutation_prob) {
+		if (rng.getRandomBool()) addNode();
 		else removeNode();
 	}
 }
@@ -228,14 +219,14 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
 	}
 	//Squash output into collaboration probability
-	numval collaborate_prob = sigmoidalSquash(output, output_node_threshold);
+	numval cooperate_prob = sigmoidalSquash(output, output_node_threshold);
 	
-	//If random prob < collaborate prob : collaborate
-	return distribution_prob_values(generator) < collaborate_prob;
+	//If random prob < cooperate prob : cooperate
+	return rng.getRandomProbability() < cooperate_prob;
 }
 
 /*Returns true if it chooses to cooperate by default, false otherwise*/
 bool NeuralNetwork::operator()()
 {
-	return collaborate_by_default;
+	return cooperate_by_default;
 }
