@@ -5,6 +5,7 @@
 RNG Simulation::rng = RNG();
 
 Simulation::Simulation(const GamePayoffs& payoffs):
+	strats(rng), //strategy evaluation
 	population(), //nullptr array
 	population_payoff_sum(), //array of 0s
 	population_game_count(), //array of 0s
@@ -127,4 +128,9 @@ void Simulation::nextGeneration()
 		population[i] = new_population[i];
 		population[i]->mutate();
 	}
+}
+
+void Simulation::assessPopulation()
+{
+	
 }
