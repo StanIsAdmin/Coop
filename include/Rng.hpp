@@ -42,6 +42,8 @@ class RNG
 		double getRandomNumval();
 		
 		double getRandomProbability();
+		
+		bool getTrueWithProbability(double trueProbability);
 };
 
 #endif //RNG_H

@@ -17,7 +17,7 @@ std::uniform_int_distribution<int> RNG::distribution_initial_nodes = std::unifor
 //Real values
 std::normal_distribution<double> RNG::distribution_real_values = std::normal_distribution<double>(NUMVAL_MEAN, NUMVAL_STDDEV);
 
-//Probabilities
+//Probabilities (0 is included, 1 is not)
 std::uniform_real_distribution<double> RNG::distribution_prob_values = std::uniform_real_distribution<double>(0, 1);
 
 
@@ -39,4 +39,8 @@ double RNG::getRandomNumval() {
 
 double RNG::getRandomProbability() {
 	return distribution_prob_values(generator);
+}
+
+bool RNG::getTrueWithProbability(double trueProbability) {
+	return trueProbability > distribution_prob_values(generator);
 }
