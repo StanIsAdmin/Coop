@@ -2,6 +2,7 @@
 #define RNG_H
 
 #include <random>
+#include <array>
 
 #define ROUND_ITERATIONS_STOP_COUNT 1
 #define ROUND_ITERATIONS_MEAN_PROB 0.98
@@ -14,7 +15,6 @@ class RNG
 	private:
 		static std::random_device seed;
 		
-	public:
 		static std::mt19937_64 generator;
 		
 		//number of game iterations between two players (pascal distribution with prob. ROUND_ITERATIONS_MEAN_PROB, stops after ROUND_ITERATIONS_STOP_COUNT)
@@ -31,6 +31,7 @@ class RNG
 		
 		//random probability (uniform distribution between 0 and 1)
 		static std::uniform_real_distribution<double> distribution_prob_values;
+		
 
 	public:
 		int getIterationCount();
@@ -44,6 +45,18 @@ class RNG
 		double getRandomProbability();
 		
 		bool getTrueWithProbability(double trueProbability);
+		
+		//selects random individuals from population based on their fitness
+		template<std::size_t SIZE>
+		void selectPopulation(std::array<double, SIZE>& population_fitness, std::array<int, SIZE>& new_population_indexes) {
+			//distribution with probability based on fitness
+			std::discrete_distribution<int> distribution_population(population_fitness.begin(), population_fitness.end());
+			
+			//choose indexes
+			for (int i=0; i<SIZE; ++i) {
+				new_population_indexes[i] = distribution_population(generator);
+			}
+		}
 };
 
 #endif //RNG_H

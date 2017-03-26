@@ -100,27 +100,26 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 
 /*Creates a new population by selection based on fitness followed by mutation*/
 void Simulation::nextGeneration()
-{
-	std::array<double, POPULATION_SIZE> population_fitness;
-	
+{	
 	//calculate fitness based on mean payoff per round
+	std::array<double, POPULATION_SIZE> population_fitness;
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
 	}
 	
-	//probability of selection is proportional to individual's fitness
-	std::discrete_distribution<int> distribution_population(population_fitness.begin(), population_fitness.end());
+	//select population with probability proportional to individual's fitness
+	std::array<int, POPULATION_SIZE> new_population_indexes;
+	rng.selectPopulation<POPULATION_SIZE>(population_fitness, new_population_indexes);
 	
-	//select new population from the previous one, based on the distribution
+	//create the new population with the new selection
 	NeuralNetwork* new_population[POPULATION_SIZE];
 	int selected_index;
-	
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		selected_index = distribution_population(rng.generator); //choose an index
+		selected_index = new_population_indexes[i]; //index of selected individual
 		new_population[i] = new NeuralNetwork(*(population[selected_index])); //copy the NN
 	}
 	
-	//replace the population, reset their stats, and mutate the new individuals
+	//replace the old population, reset their stats, and mutate the new individuals
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		delete population[i];
 		population_game_count[i] = 0;

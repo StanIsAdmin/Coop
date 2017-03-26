@@ -1,8 +1,8 @@
 #ifndef SIMULATION_H
 #define SIMULATION_H
 
+#include <array>
 #include <iostream>
-#include <random>
 
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
