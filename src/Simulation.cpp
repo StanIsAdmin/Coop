@@ -5,7 +5,7 @@
 RNG Simulation::rng = RNG();
 
 Simulation::Simulation(const GamePayoffs& payoffs):
-	strats(rng), //strategy evaluation
+	strats(rng, payoffs), //strategy evaluation
 	population(), //nullptr array
 	population_payoff_sum(), //array of 0s
 	population_game_count(), //array of 0s
@@ -26,31 +26,6 @@ void Simulation::run(unsigned int generations)
 		playGeneration();
 	}
 	std::cout << "Simulation finished!" << std::endl;
-}
-
-/*Assigns payoffs to both players depending on their choices and the game rules*/
-void Simulation::payoffsFromChoices(bool playerACoops, bool playerBCoops, payoff& playerAPayoff, payoff& playerBPayoff)
-{
-	//both cooperate
-	if (playerACoops && playerBCoops)  {
-		playerAPayoff = game_payoffs.both_cooperate;
-		playerBPayoff = game_payoffs.both_cooperate;
-	}
-	//A cooperates, B defects
-	else if (playerACoops && !playerBCoops) {
-		playerAPayoff = game_payoffs.self_cooperates_other_defects;
-		playerBPayoff = game_payoffs.self_defects_other_cooperates;
-	}
-	//A defects, B cooperates
-	else if (!playerACoops && playerBCoops) {
-		playerAPayoff = game_payoffs.self_defects_other_cooperates;
-		playerBPayoff = game_payoffs.self_cooperates_other_defects;
-	}
-	//both defect
-	else {
-		playerAPayoff = game_payoffs.both_defect;
-		playerBPayoff = game_payoffs.both_defect;
-	}
 }
 
 /*Plays all individuals from this generation against each other*/
@@ -82,7 +57,7 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 	
 	for (int iteration=0; iteration<round_iterations; ++iteration) {
 		//Gather payoffs from individual's decisions
-		payoffsFromChoices(playerA_cooperates, playerB_cooperates, playerA_payoff, playerB_payoff);
+		game_payoffs.payoffsFromChoices(playerA_cooperates, playerB_cooperates, playerA_payoff, playerB_payoff);
 		playerA_payoff_sum += playerA_payoff;
 		playerB_payoff_sum += playerB_payoff;
 		
@@ -131,5 +106,7 @@ void Simulation::nextGeneration()
 
 void Simulation::assessPopulation()
 {
-	
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population_strategies[i] = strats.closestPureStrategy(*(population[i]));
+	}
 }

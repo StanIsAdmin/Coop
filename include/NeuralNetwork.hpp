@@ -10,10 +10,10 @@
 #include <cassert>
 
 #include "Rng.hpp"
+#include "Payoffs.hpp"
 
 #define MAXNODES 10
 
-typedef unsigned short payoff;
 typedef double numval;
 
 /*Squashing function used by cognitive and output nodes*/

@@ -3,6 +3,7 @@
 
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
+#include "Payoffs.hpp"
 
 #define ASSESSMENT_COUNT 5
 #define ASSESSMENT_SIZE 20
@@ -11,10 +12,12 @@
 class Strategies
 {
 	private:
-		RNG rng;
+		RNG rng; //random number generator
+		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
-		///Random choices sequences
-		double assessment_sequences[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
+		///Choices sequences
+		bool assessment_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //random choices
+		bool player_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //assessed player's choices
 	
 		///Pure strategies move sequences
 		bool always_cooperate_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
@@ -25,8 +28,10 @@ class Strategies
 		
 		void initStrategies(); //initialize choice sequences and pure strategies
 		
+		std::string compareChoices(); //compares player_choices to each pure strategy
+		
 	public:
-		Strategies(RNG& rng);
+		Strategies(RNG& rng, const GamePayoffs& payoffs);
 		
 		//returns the player's closest pure strategy
 		std::string closestPureStrategy(NeuralNetwork& player);

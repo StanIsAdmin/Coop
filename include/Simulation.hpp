@@ -7,17 +7,11 @@
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
 #include "Strategies.hpp"
+#include "Payoffs.hpp"
 
 #define POPULATION_SIZE 50
 #define NODE_FITNESS_PENALTY 0.01
 
-/*Contains the payoffs for each possible outcome of a game*/
-struct GamePayoffs {
-	payoff both_cooperate = 0;
-	payoff both_defect = 0;
-	payoff self_cooperates_other_defects = 0;
-	payoff self_defects_other_cooperates = 0;
-};
 
 /*Creates a population of individuals and runs the simulation steps as defined in the paper*/
 class Simulation
@@ -37,9 +31,6 @@ class Simulation
 		
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
-		
-		//translate individual's decision into payoffs according to game rules
-		void payoffsFromChoices(bool playerACoops, bool playerBCoops, payoff& playerAPayoff, payoff& playerBPayoff);
 		
 		void playGeneration(); //play all games for the entire generation
 		void playEachOther(int playerAIndex, int playerBIndex); //play a number of rounds between two players
