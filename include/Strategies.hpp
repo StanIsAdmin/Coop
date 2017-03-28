@@ -26,6 +26,10 @@ class Strategies
 		bool tit_for_two_tats_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
 		bool pavlov_like_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
 		
+		bool (*all_strats[5])[ASSESSMENT_COUNT][ASSESSMENT_SIZE] = {&always_cooperate_strat, &always_defect_strat, &tit_for_tat_strat, &tit_for_two_tats_strat, &pavlov_like_strat};
+		
+		std::string all_strat_names[5];
+		
 		void initStrategies(); //initialize choice sequences and pure strategies
 		
 		std::string compareChoices(); //compares player_choices to each pure strategy

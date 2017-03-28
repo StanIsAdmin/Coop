@@ -24,6 +24,7 @@ void Simulation::run(unsigned int generations)
 	std::cout << "Running simulation..." << std::endl;
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
 		playGeneration();
+		assessPopulation(gen_count);
 	}
 	std::cout << "Simulation finished!" << std::endl;
 }
@@ -104,9 +105,37 @@ void Simulation::nextGeneration()
 	}
 }
 
-void Simulation::assessPopulation()
+void Simulation::assessPopulation(unsigned int generation)
 {
+	std::cout << "----- GENERATION " << generation << std::endl;
+	
+	//Networks
+	std::cout << "- Networks" << std::endl;
+	int averageIntelligence = 0;
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		averageIntelligence += population[i]->getInnerNodeCount();
+	}
+	std::cout << "Avg. intel: " << averageIntelligence / (double) POPULATION_SIZE << std::endl;
+	std::cout << std::endl;
+	
+	
+	//Strategies
+	std::cout << "- Strategies" << std::endl;
+	std::map<std::string, int> stratCount = {
+		{"cooper", 0},
+		{"defect", 0},
+		{"tittat", 0},
+		{"twotat", 0},
+		{"pavlov", 0}
+	};
+	
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		population_strategies[i] = strats.closestPureStrategy(*(population[i]));
+		stratCount[population_strategies[i]] += 1;
+ 	}
+	
+	for (auto stratCountItr = stratCount.begin(); stratCountItr!=stratCount.end(); stratCountItr++) {
+		std::cout << stratCountItr->first << ": " << stratCountItr->second << std::endl;
 	}
+	std::cout << std::endl;
 }

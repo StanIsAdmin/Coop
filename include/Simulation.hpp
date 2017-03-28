@@ -3,6 +3,7 @@
 
 #include <array>
 #include <iostream>
+#include <map>
 
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
@@ -39,7 +40,7 @@ class Simulation
 		void nextGeneration(); //replaces the current generation by the next one
 		
 		///Population assessment
-		void assessPopulation(); //assigns to each network its closest pure strategy
+		void assessPopulation(unsigned int generation); //assigns to each network its closest pure strategy
 	
 	public:
 		Simulation(const GamePayoffs& payoffs);
