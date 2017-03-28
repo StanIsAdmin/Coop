@@ -115,7 +115,7 @@ void Simulation::assessPopulation(unsigned int generation)
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		averageIntelligence += population[i]->getInnerNodeCount();
 	}
-	std::cout << "Avg. intel: " << averageIntelligence / (double) POPULATION_SIZE << std::endl;
+	std::cout << "Avg. intel: " << averageIntelligence / static_cast<double>(POPULATION_SIZE) << std::endl;
 	std::cout << std::endl;
 	
 	

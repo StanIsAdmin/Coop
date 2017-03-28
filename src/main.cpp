@@ -59,6 +59,6 @@ void runSimulation(int sim_rounds, std::string game_type)
 	std::cout << "Rounds: " << sim_rounds << std::endl;
 	std::cout << "Game: " << game_type << std::endl;
 	
-	Simulation sim = Simulation(sim_payoffs);
+	Simulation sim(sim_payoffs);
 	sim.run(sim_rounds);
 }
