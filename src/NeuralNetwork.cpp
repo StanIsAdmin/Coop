@@ -25,6 +25,7 @@ void InnerNode::setContextNode(numval value, numval link_weight)
 
 void InnerNode::removeContextNode()
 {
+	assert(has_context_node);
 	has_context_node = false;
 }
 	
@@ -45,6 +46,7 @@ numval InnerNode::operator()(numval input)
 		input = sigmoidalSquash(input, threshold_value);
 	}
 	assert(input >= 0 and input <= 1);
+	
 	return input;
 }
 
@@ -73,9 +75,14 @@ NeuralNetwork::NeuralNetwork():
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	cooperate_by_default(nn.cooperate_by_default),
 	output_node_threshold(nn.output_node_threshold),
-	inner_nodes()
+	inner_nodes(),
+	cognitive_node_count(nn.cognitive_node_count),
+	context_node_count(nn.context_node_count)
 {
 	for (int i=0; i<MAXNODES; ++i) {
+		link_weights_from_self_payoff[i] = nn.link_weights_from_self_payoff[i];
+		link_weights_from_other_payoff[i] = nn.link_weights_from_other_payoff[i];
+		link_weights_from_inner_nodes[i] = nn.link_weights_from_inner_nodes[i];
 		if (nn.inner_nodes[i]) 
 			inner_nodes[i] = new InnerNode(*nn.inner_nodes[i]);
 	}
