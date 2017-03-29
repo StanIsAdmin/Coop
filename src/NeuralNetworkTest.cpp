@@ -15,21 +15,28 @@ void testNeuralNetwork()
 	assert(conNodes <= cogNodes);
 
 	///Node addition and removal
-	for (int i=0; i<MAXNODES*2-innNodes; ++i) {
+	for (int i=0; i< (MAXNODES*2) - innNodes; ++i) {
 		nn.addNode();
+		assert(nn.getInnerNodeCount() == innNodes + i + 1);
 	}
 	
 	assert(nn.getCognitiveNodeCount() == MAXNODES);
 	assert(nn.getContextNodeCount() == MAXNODES);
 	assert(nn.getInnerNodeCount() == 2*MAXNODES);
 	
-	for (int i=0; i<20; ++i) {
+	innNodes = MAXNODES*2;
+	for (int i=0; i<MAXNODES*2 and innNodes>0; ++i) {
 		nn.removeNode();
+		
+		assert(innNodes == nn.getInnerNodeCount() + 1 or innNodes == nn.getInnerNodeCount() + 2);
 		assert(nn.getCognitiveNodeCount() >= nn.getContextNodeCount());
+		
+		innNodes = nn.getInnerNodeCount();
 	}
 	
 	assert(nn.getCognitiveNodeCount() == 0);
 	assert(nn.getContextNodeCount() == 0);
+	assert(nn.getInnerNodeCount() == 0);
 	
 	nn.mutate();
 	
