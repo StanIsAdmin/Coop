@@ -25,6 +25,7 @@ void Simulation::run(unsigned int generations)
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
 		playGeneration();
 		assessPopulation(gen_count);
+		nextGeneration();
 	}
 	std::cout << "Simulation finished!" << std::endl;
 }
@@ -74,7 +75,7 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 	population_game_count[playerBIndex] += round_iterations;
 }
 
-/*Creates a new population by selection based on fitness followed by mutation*/
+/*Replaces the current generation by selection based on fitness followed by mutation*/
 void Simulation::nextGeneration()
 {	
 	//calculate fitness based on mean payoff per round
@@ -92,19 +93,19 @@ void Simulation::nextGeneration()
 	int selected_index;
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		selected_index = new_population_indexes[i]; //index of selected individual
-		new_population[i] = new NeuralNetwork(*(population[selected_index])); //copy the NN
+		new_population[i] = new NeuralNetwork(*population[selected_index]); //copy the NN
 	}
-	
 	//replace the old population, reset their stats, and mutate the new individuals
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		delete population[i];
 		population_game_count[i] = 0;
 		population_payoff_sum[i] = 0;
-		population[i] = new_population[i];
+		population[i] = new_population[i]; //copy pointer to new NeuralNetwork
 		population[i]->mutate();
 	}
 }
 
+/*Determines the current population's typical strategies and other metrics*/
 void Simulation::assessPopulation(unsigned int generation)
 {
 	std::cout << "----- GENERATION " << generation << std::endl;
