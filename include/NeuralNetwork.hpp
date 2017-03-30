@@ -3,11 +3,10 @@
 
 // #define NDEBUG //TODO: use in release version
 
-#include <random>
 #include <cmath>
-#include <limits>
 #include <iostream>
 #include <cassert>
+#include <vector>
 
 #include "Rng.hpp"
 #include "Payoffs.hpp"
@@ -62,13 +61,15 @@ class NeuralNetwork
 		bool cooperate_by_default; //used for decision-making in first round
 		numval output_node_threshold; //same use as inner nodes thresholds
 		
-		InnerNode* inner_nodes[MAXNODES]; //Neural network's hidden layer nodes
-		numval link_weights_from_self_payoff[MAXNODES]; //link weights between first input and nodes
-		numval link_weights_from_other_payoff[MAXNODES]; //...between second input and nodes
-		numval link_weights_from_inner_nodes[MAXNODES]; //...between nodes and output
+		unsigned int cognitive_node_count = 0;
+		unsigned int context_node_count = 0;
 		
-		int cognitive_node_count = 0;
-		int context_node_count = 0;
+		std::vector<InnerNode*> inner_nodes; //Neural network's hidden layer nodes
+		std::vector<numval> link_weights_from_self_payoff; //link weights between first input and nodes
+		std::vector<numval> link_weights_from_other_payoff; //...between second input and nodes
+		std::vector<numval> link_weights_from_inner_nodes; //...between nodes and output
+		
+		unsigned int getRandomCognitiveNode(bool withContext);
 	
 	public:
 		///Constructors
@@ -85,7 +86,12 @@ class NeuralNetwork
 
 		/**Methods & Operators**/
 		void addNode(); //adds a node to the structure if possible
+		void addContextNode(); //adds a context node to the structure (place must be available)
+		void addCognitiveNode(); //adds a cognitive node to the structure (place must be available)
+		
 		void removeNode(); //removes a node from the structure if possible
+		void removeContextNode();
+		void removeCognitiveNode();
 		
 		void mutate(); //implements all specified mutations with given random probabilities
 		
