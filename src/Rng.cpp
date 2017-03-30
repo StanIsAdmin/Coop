@@ -44,3 +44,9 @@ double RNG::getRandomProbability() {
 bool RNG::getTrueWithProbability(double trueProbability) {
 	return trueProbability > distribution_prob_values(generator);
 }
+
+/*Returns a random integer in the range [rangeStart, rangeStop] (inclusive)*/
+int RNG::getRandomInt(int rangeStart, int rangeStop) {
+	std::uniform_int_distribution<int> distribution_int = std::uniform_int_distribution<int>(rangeStart, rangeStop);
+	return distribution_int(generator);
+}

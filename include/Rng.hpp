@@ -46,6 +46,8 @@ class RNG
 		
 		bool getTrueWithProbability(double trueProbability);
 		
+		int getRandomInt(int rangeStart, int rangeStop);
+		
 		//selects random individuals from population based on their fitness
 		template<std::size_t SIZE>
 		void selectPopulation(std::array<double, SIZE>& population_fitness, std::array<int, SIZE>& new_population_indexes) {
