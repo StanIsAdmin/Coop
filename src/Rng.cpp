@@ -35,9 +35,14 @@ bool RNG::seedIsRandom() {
 }
 
 int RNG::getIterationCount() {
-	//TODO: understand what the paper meant
-	//std::cout << distribution_iterations(generator) << ", ";
-	return 50;//distribution_iterations(generator) + 1;
+	int iterations = 1;
+	double continueProb = 1 - distribution_iterations(generator);
+	while (continueProb) {
+		iterations++;
+		continueProb = 1 - distribution_iterations(generator);
+	}
+	
+	return iterations;
 }
 
 bool RNG::getRandomBool() {

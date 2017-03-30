@@ -33,7 +33,6 @@ class RNG
 		
 		//random probability (uniform distribution between 0 and 1)
 		static std::uniform_real_distribution<double> distribution_prob_values;
-		
 
 	public:
 		static long long int getSeed();
