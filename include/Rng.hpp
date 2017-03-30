@@ -15,6 +15,7 @@ class RNG
 {
 	private:
 		static long long int seed;
+		static bool seed_is_random;
 		
 		static std::mt19937_64 generator;
 		
@@ -36,6 +37,8 @@ class RNG
 
 	public:
 		static long long int getSeed();
+		
+		static bool seedIsRandom();
 	
 		static int getIterationCount();
 		

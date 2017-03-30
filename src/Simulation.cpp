@@ -5,7 +5,7 @@
 RNG Simulation::rng = RNG();
 
 Simulation::Simulation(const GamePayoffs& payoffs):
-	strats(rng, payoffs), //strategy evaluation
+	strats(payoffs), //strategy evaluation
 	population(), //nullptr array
 	population_payoff_sum(), //array of 0s
 	population_game_count(), //array of 0s
@@ -21,6 +21,12 @@ Simulation::Simulation(const GamePayoffs& payoffs):
 /*Executes one complete simulation with a certain number of generations*/
 void Simulation::run(unsigned int generations)
 {
+	std::cout << "Using RNG seed: " << rng.getSeed();
+	if (rng.seedIsRandom())
+		std::cout << " (random)" << std::endl;
+	else
+		std::cout << " (provided)" << std::endl;
+	
 	std::cout << "Running simulation..." << std::endl;
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
 		playGeneration();
@@ -81,6 +87,7 @@ void Simulation::nextGeneration()
 	//calculate fitness based on mean payoff per round
 	std::array<double, POPULATION_SIZE> population_fitness;
 	for (int i=0; i<POPULATION_SIZE; ++i) {
+		
 		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
 	}
 	

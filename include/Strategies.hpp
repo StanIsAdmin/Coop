@@ -12,7 +12,7 @@
 class Strategies
 {
 	private:
-		RNG rng; //random number generator
+		static RNG rng; //random number generator
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
 		///Choices sequences
@@ -35,7 +35,7 @@ class Strategies
 		std::string compareChoices(); //compares player_choices to each pure strategy
 		
 	public:
-		Strategies(RNG& rng, const GamePayoffs& payoffs);
+		Strategies(const GamePayoffs& payoffs);
 		
 		//returns the player's closest pure strategy
 		std::string closestPureStrategy(NeuralNetwork& player);

@@ -2,7 +2,13 @@
 
 
 /*Static members*/
+#ifndef SEED
 long long int RNG::seed = std::random_device()();
+bool RNG::seed_is_random = true;
+#else
+long long int RNG::seed = SEED;
+bool RNG::seed_is_random = false;
+#endif
 std::mt19937_64 RNG::generator = std::mt19937_64(seed);
 
 //Game iterations
@@ -22,6 +28,10 @@ std::uniform_real_distribution<double> RNG::distribution_prob_values = std::unif
 
 long long int RNG::getSeed() {
 	return seed;
+}
+
+bool RNG::seedIsRandom() {
+	return seed_is_random;
 }
 
 int RNG::getIterationCount() {

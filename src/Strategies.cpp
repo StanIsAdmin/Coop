@@ -1,8 +1,10 @@
 #include "Strategies.hpp"
 
 
-Strategies::Strategies(RNG& rng, const GamePayoffs& payoffs) :
-	rng(rng),
+/*Static members*/
+RNG Strategies::rng = RNG();
+
+Strategies::Strategies(const GamePayoffs& payoffs) :
 	game_payoffs(payoffs),
 	all_strat_names({"cooper", "defect", "tittat", "twotat", "pavlov"})
 {
