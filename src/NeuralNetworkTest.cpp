@@ -45,7 +45,7 @@ void testNeuralNetwork()
 	assert(innNodes <= MAXINITIALNODES);
 	assert(conNodes <= cogNodes);
 
-	///Node addition and removal
+	///Node addition
 	for (int i=0; i< (MAXNODES*2) - innNodes; ++i) {
 		nn.addNode();
 		assert(nn.getInnerNodeCount() == innNodes + i + 1);
@@ -55,6 +55,11 @@ void testNeuralNetwork()
 	assert(nn.getContextNodeCount() == MAXNODES);
 	assert(nn.getInnerNodeCount() == 2*MAXNODES);
 	
+	///Copy constructor
+	NeuralNetwork nn2(nn);
+	assert(nn == nn2);
+	
+	///Node removal
 	innNodes = MAXNODES*2;
 	for (int i=0; i<MAXNODES*2 and innNodes>0; ++i) {
 		nn.removeNode();
@@ -64,12 +69,17 @@ void testNeuralNetwork()
 		
 		innNodes = nn.getInnerNodeCount();
 	}
-	
 	assert(nn.getCognitiveNodeCount() == 0);
 	assert(nn.getContextNodeCount() == 0);
 	assert(nn.getInnerNodeCount() == 0);
 	
-	nn.mutate();
+	///Node mutation
+	NeuralNetwork nn3(nn2);
+	for (int i=0; i<20; ++i) {
+		nn3.mutate();
+		nn2.mutate();
+	}
+	assert(nn3 != nn2);
 	
 	///Randomness of cooperate/defect
 	int defaultCollab = 0;

@@ -28,7 +28,6 @@ class InnerNode
 		bool has_context_node = false; //is a context node attached ?
 		numval context_value = 0; //the context value acts as a memory
 		numval context_link_weight = 0; //multiplicator for input from context node
-		
 		numval threshold_value;	//used by the squashing function of the cognitive node	
 	
 	public:
@@ -43,6 +42,8 @@ class InnerNode
 		void removeContextNode(); //remove associated context node
 		
 		numval operator()(numval input); //get output value given the provided input
+		
+		bool operator==(const InnerNode& in);
 };
 
 
@@ -101,6 +102,9 @@ class NeuralNetwork
 		
 		bool operator()(payoff self, payoff other); //decide whether to cooperate or defect
 		bool operator()(); //default decision (without input)
+		
+		bool operator==(const NeuralNetwork& nn);
+		bool operator!=(const NeuralNetwork& nn);
 };
 
 #endif // NEURALNETWORK_H

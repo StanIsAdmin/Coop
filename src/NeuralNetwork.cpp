@@ -57,6 +57,14 @@ numval InnerNode::operator()(numval input)
 	return input;
 }
 
+bool InnerNode::operator==(const InnerNode& in)
+{
+	return has_context_node == in.has_context_node
+		and context_value == in.context_value
+		and context_link_weight == in.context_link_weight
+		and threshold_value == in.threshold_value;
+}
+
 
 /**---------- NeuralNetwork ----------**/
 
@@ -91,7 +99,7 @@ NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	for (unsigned int i=0; i<nn.cognitive_node_count; ++i) {
 		inner_nodes.push_back(new InnerNode(*nn.inner_nodes[i]));
 	}
-	assert(getInnerNodeCount() >= 0 and getInnerNodeCount() <= MAXINITIALNODES);
+	assert(getInnerNodeCount() >= 0 and getInnerNodeCount() <= MAXNODES*2);
 }
 
 /*Destructor*/
@@ -309,4 +317,23 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 bool NeuralNetwork::operator()()
 {
 	return cooperate_by_default;
+}
+
+/*Returns true if both neuralnetworks have the exact same structures and values, false otherwise*/
+bool NeuralNetwork::operator==(const NeuralNetwork& nn)
+{
+	return context_node_count == nn.context_node_count
+		and cognitive_node_count == nn.cognitive_node_count
+		and cooperate_by_default == nn.cooperate_by_default
+		and output_node_threshold == nn.output_node_threshold
+		and link_weights_from_self_payoff == nn.link_weights_from_self_payoff
+		and link_weights_from_other_payoff == nn.link_weights_from_other_payoff
+		and link_weights_from_inner_nodes == nn.link_weights_from_inner_nodes
+		and std::equal(inner_nodes.begin(), inner_nodes.end(), nn.inner_nodes.begin(), 
+               [](InnerNode* left, InnerNode* right){ return *left == *right; });
+}
+
+bool NeuralNetwork::operator!=(const NeuralNetwork& nn)
+{
+	return not operator==(nn);
 }
