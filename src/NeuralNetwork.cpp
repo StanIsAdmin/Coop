@@ -1,7 +1,7 @@
 #include "NeuralNetwork.hpp"
 
 
-/**-------------------- Out of class**/
+/**---------- Out of class ----------**/
 
 /* Computes the sigmoidal squash of -value -threshold (maps values from [-inf, inf] to [0, 1]) */
 numval sigmoidalSquash(numval value, numval threshold)
@@ -9,34 +9,41 @@ numval sigmoidalSquash(numval value, numval threshold)
 	return 1/(1+std::exp(-value-threshold));
 }
 
-/**-------------------- InnerNode**/
+
+/**---------- InnerNode ----------**/
 
 /*Regular constructor with provided threshold value*/
 InnerNode::InnerNode(numval threshold):
 	threshold_value(threshold)
 	{}
-
-void InnerNode::setContextNode(numval value, numval link_weight)
-{
-	has_context_node = true;
-	context_value = value;
-	context_link_weight = link_weight;
-}
-
-void InnerNode::removeContextNode()
-{
-	assert(has_context_node);
-	has_context_node = false;
-}
 	
 bool InnerNode::hasContextNode()
 {
 	return has_context_node;
 }
 
-/* Returns the node output given the provided input*/
+/*Adds a context node to the cognitive node*/
+void InnerNode::addContextNode(numval value, numval link_weight)
+{
+	assert(not hasContextNode());
+	has_context_node = true;
+	context_value = value;
+	context_link_weight = link_weight;
+}
+
+/*Removes the context node from the cognitive node*/
+void InnerNode::removeContextNode()
+{
+	assert(hasContextNode());
+	has_context_node = false;
+	context_value = 0;
+	context_link_weight = 0;
+}
+
+/*Returns the node output given the provided input*/
 numval InnerNode::operator()(numval input)
 {
+	assert(not std::isnan(input)); //verify numval is a regular numeric value
 	if (has_context_node) {
 		input += context_value * context_link_weight; //add weighted context to input
 		input = sigmoidalSquash(input, threshold_value);
@@ -45,13 +52,13 @@ numval InnerNode::operator()(numval input)
 	else {
 		input = sigmoidalSquash(input, threshold_value);
 	}
-	assert(input >= 0 and input <= 1);
+	assert(input >= 0 and input <= 1); //verify the squashing function worked
 	
 	return input;
 }
 
 
-/**-------------------- NeuralNetwork**/
+/**---------- NeuralNetwork ----------**/
 
 /*Static members*/
 RNG NeuralNetwork::rng = RNG();
@@ -116,7 +123,7 @@ void NeuralNetwork::addNode()
 		//Add context node to one cognitive node (random context value and link weight)
 		numval context_value = rng.getRandomNumval();
 		numval link_weight = rng.getRandomNumval();
-		inner_nodes[context_node_count]->setContextNode(context_value, link_weight);
+		inner_nodes[context_node_count]->addContextNode(context_value, link_weight);
 		context_node_count++;
 	}
 	else {

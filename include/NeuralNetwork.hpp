@@ -39,9 +39,9 @@ class InnerNode
 		InnerNode(const InnerNode&) = default;
 		
 		//set values for associated context node (creates context node if needed)
-		void setContextNode(numval value, numval link_weight); 
-		void removeContextNode(); //remove associated context node
 		bool hasContextNode(); //does the cognitive node has associated context node
+		void addContextNode(numval value, numval link_weight); 
+		void removeContextNode(); //remove associated context node
 		
 		numval operator()(numval input); //get output value given the provided input
 };
