@@ -2,8 +2,8 @@
 
 
 /*Static members*/
-std::random_device RNG::seed;
-std::mt19937_64 RNG::generator = std::mt19937_64(seed());
+long long int RNG::seed = std::random_device()();
+std::mt19937_64 RNG::generator = std::mt19937_64(seed);
 
 //Game iterations
 std::negative_binomial_distribution<int> RNG::distribution_iterations = std::negative_binomial_distribution<int>(ROUND_ITERATIONS_STOP_COUNT, ROUND_ITERATIONS_MEAN_PROB);
@@ -20,9 +20,14 @@ std::normal_distribution<double> RNG::distribution_real_values = std::normal_dis
 //Probabilities (0 is included, 1 is not)
 std::uniform_real_distribution<double> RNG::distribution_prob_values = std::uniform_real_distribution<double>(0, 1);
 
+long long int RNG::getSeed() {
+	return seed;
+}
 
 int RNG::getIterationCount() {
-	return distribution_iterations(generator);
+	//TODO: understand what the paper meant
+	//std::cout << distribution_iterations(generator) << ", ";
+	return 50;//distribution_iterations(generator) + 1;
 }
 
 bool RNG::getRandomBool() {

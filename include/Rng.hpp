@@ -3,6 +3,7 @@
 
 #include <random>
 #include <array>
+#include <iostream>
 
 #define ROUND_ITERATIONS_STOP_COUNT 1
 #define ROUND_ITERATIONS_MEAN_PROB 0.98
@@ -13,7 +14,7 @@
 class RNG 
 {
 	private:
-		static std::random_device seed;
+		static long long int seed;
 		
 		static std::mt19937_64 generator;
 		
@@ -34,23 +35,25 @@ class RNG
 		
 
 	public:
-		int getIterationCount();
+		static long long int getSeed();
+	
+		static int getIterationCount();
 		
-		bool getRandomBool();
+		static bool getRandomBool();
 		
-		int getInitialNodeCount();
+		static int getInitialNodeCount();
 		
-		double getRandomNumval();
+		static double getRandomNumval();
 		
-		double getRandomProbability();
+		static double getRandomProbability();
 		
-		bool getTrueWithProbability(double trueProbability);
+		static bool getTrueWithProbability(double trueProbability);
 		
-		int getRandomInt(int rangeStart, int rangeStop);
+		static int getRandomInt(int rangeStart, int rangeStop);
 		
 		//selects random individuals from population based on their fitness
 		template<std::size_t SIZE>
-		void selectPopulation(std::array<double, SIZE>& population_fitness, std::array<int, SIZE>& new_population_indexes) {
+		static void selectPopulation(std::array<double, SIZE>& population_fitness, std::array<int, SIZE>& new_population_indexes) {
 			//distribution with probability based on fitness
 			std::discrete_distribution<int> distribution_population(population_fitness.begin(), population_fitness.end());
 			
