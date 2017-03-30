@@ -32,7 +32,7 @@ program_BIN_DIR := bin
 debugging := false
 
 # CPPFLAGS are extra flags to give to the C preprocessor and programs that use it (like the C compiler)
-CPPFLAGS += -std=c++11 -Wpedantic -Wall -Wextra -Winit-self -Winline -Wconversion -Weffc++ -Wstrict-null-sentinel -Wold-style-cast -Wnoexcept -Wctor-dtor-privacy -Woverloaded-virtual -Wconversion -Wsign-promo -Wzero-as-null-pointer-constant 
+CPPFLAGS += -std=c++11 -Wpedantic -Wall -Wextra -Winit-self -Winline -Wconversion -Wstrict-null-sentinel -Wold-style-cast -Wnoexcept -Wctor-dtor-privacy -Woverloaded-virtual -Wconversion -Wsign-promo -Wzero-as-null-pointer-constant 
 
 # CXXFLAGS are extra flags to give to the C++ compiler
 CXXFLAGS +=

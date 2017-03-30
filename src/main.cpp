@@ -1,3 +1,4 @@
+#include "Rng.hpp"
 #include "NeuralNetwork.hpp"
 #include "NeuralNetworkTest.hpp"
 #include "Simulation.hpp"
@@ -56,9 +57,9 @@ void runSimulation(int sim_rounds, std::string game_type)
 		return;
 	}
 	
-	std::cout << "Rounds: " << sim_rounds << std::endl;
 	std::cout << "Game: " << game_type << std::endl;
+	std::cout << "Rounds: " << sim_rounds << std::endl;
 	
-	Simulation sim = Simulation(sim_payoffs);
+	Simulation sim(sim_payoffs);
 	sim.run(sim_rounds);
 }
