@@ -82,14 +82,14 @@ NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	cooperate_by_default(nn.cooperate_by_default),
 	output_node_threshold(nn.output_node_threshold),
 	cognitive_node_count(nn.cognitive_node_count),
-	context_node_count(nn.context_node_count)
+	context_node_count(nn.context_node_count),
+	link_weights_from_self_payoff(nn.link_weights_from_self_payoff),
+	link_weights_from_other_payoff(nn.link_weights_from_other_payoff),
+	link_weights_from_inner_nodes(nn.link_weights_from_inner_nodes)
 {
-	for (int i=0; i<MAXNODES; ++i) {
-		link_weights_from_self_payoff[i] = nn.link_weights_from_self_payoff[i];
-		link_weights_from_other_payoff[i] = nn.link_weights_from_other_payoff[i];
-		link_weights_from_inner_nodes[i] = nn.link_weights_from_inner_nodes[i];
-		if (nn.inner_nodes[i]) 
-			inner_nodes[i] = new InnerNode(*nn.inner_nodes[i]);
+	//Create new inner nodes by copying nn's inner nodes
+	for (unsigned int i=0; i<nn.cognitive_node_count; ++i) {
+		inner_nodes.push_back(new InnerNode(*nn.inner_nodes[i]));
 	}
 	assert(getInnerNodeCount() >= 0 and getInnerNodeCount() <= MAXINITIALNODES);
 }
@@ -105,13 +105,16 @@ NeuralNetwork::~NeuralNetwork()
 unsigned int NeuralNetwork::getRandomCognitiveNode(bool withContext)
 {
 	//Find which cognitive nodes have or do not have a context (depending on withContext)
-	std::vector<int> nodeSelection(MAXNODES);
-	for (int i=0; i<MAXNODES; ++i) {
+	std::vector<int> nodeSelection(0);
+	for (unsigned int i=0; i<cognitive_node_count; ++i) {
 		if (inner_nodes[i]->hasContextNode() == withContext)
 			nodeSelection.push_back(i);
 	}
 	
-	assert(MAXNODES - context_node_count == nodeSelection.size());
+	if (withContext)
+		assert(context_node_count == nodeSelection.size());
+	else
+		assert(cognitive_node_count - context_node_count == nodeSelection.size());
 	
 	//Choose random cognitive node from the context-free list
 	unsigned int chosen_context_node = nodeSelection[rng.getRandomInt(0, static_cast<int>(nodeSelection.size())-1)];
@@ -196,7 +199,7 @@ void NeuralNetwork::removeNode()
 
 void NeuralNetwork::removeContextNode() 
 {
-	assert(context_node_count > 0 and cognitive_node_count > context_node_count);
+	assert(context_node_count > 0 and cognitive_node_count >= context_node_count);
 	
 	//Get random cognitive node that DOES have a context
 	unsigned int chosen_context_node = getRandomCognitiveNode(true);
@@ -211,11 +214,11 @@ void NeuralNetwork::removeCognitiveNode()
 	assert(cognitive_node_count > 0 and cognitive_node_count == inner_nodes.size());
 	
 	//Choose random cognitive node
-	unsigned int chosen_cognitive_node = rng.getRandomInt(0, cognitive_node_count);
+	unsigned int chosen_cognitive_node = rng.getRandomInt(0, cognitive_node_count-1);
 	
 	//If cognitive node has context node, uncount it
 	cognitive_node_count--;
-	if (inner_nodes[cognitive_node_count]->hasContextNode())
+	if (inner_nodes[chosen_cognitive_node]->hasContextNode())
 		context_node_count--;
 	
 	//Remove cognitive node from the network
