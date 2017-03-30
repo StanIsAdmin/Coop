@@ -4,6 +4,37 @@ void testNeuralNetwork()
 {
 	std::cout << "Running tests..." << std::endl;
 	
+	///InnerNode class construction
+	InnerNode node(0.0);
+	assert(node(0.0) == 0.5);
+	
+	///InnerNode copy
+	InnerNode node2(node);
+	assert(node2(0.0) == 0.5);
+	
+	///InnerNode context addition
+	node.addContextNode(1.0, -3.0);
+	assert(node(3.0) == 0.5);
+	
+	///InnerNode context removal
+	node.removeContextNode();
+	assert(node(0.0) == 0.5);
+	
+	///InnerNode squashing function
+	numval max = std::numeric_limits<numval>::max();
+	numval min = std::numeric_limits<numval>::min();
+	numval low = std::numeric_limits<numval>::lowest();
+	
+	InnerNode node3(max);
+	node3.addContextNode(max, max);
+	numval result = node3(max);
+	assert(result >= 0 and  result <= 1);
+	
+	node3.removeContextNode();
+	node3.addContextNode(min, low);
+	result = node3(max);
+	assert(result >= 0 and  result <= 1);
+	
 	///Construction & initial nodes
 	NeuralNetwork nn;
 	int cogNodes = nn.getCognitiveNodeCount();
