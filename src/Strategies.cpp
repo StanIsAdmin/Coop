@@ -11,15 +11,21 @@ Strategies::Strategies(const GamePayoffs& payoffs) :
 	initStrategies();
 }
 
+
+/*
+Initializes the sequences of moves that correspond to each pure strategy.
+Each sequence of moves is made of 5 series of 20 moves (a move is a decision -cooperate or defect- in a game iteration)
+The network's moves will be compared to these moves to determine which is their closest pure strategy.*/
 void Strategies::initStrategies()
 {
 	double coopProb = 0;
 	for (int sequence=0; sequence<ASSESSMENT_COUNT; ++sequence){
 		
 		for (int choice=0; choice<ASSESSMENT_SIZE; ++choice) {
-			assessment_choices[sequence][choice] = rng.getTrueWithProbability(coopProb);
+			//The "virtual opponent" used to assess the network chooses to cooperate randomly with probability coopProb
+			opponent_choices[sequence][choice] = rng.getTrueWithProbability(coopProb);
 			
-			//Always cooperate/defect
+			//Always cooperate/defect strategies do not depend on the "virtual opponent"'s choice
 			always_cooperate_strat[sequence][choice] = true;
 			always_defect_strat[sequence][choice] = false;
 			
@@ -27,14 +33,14 @@ void Strategies::initStrategies()
 			if (choice == 0) {
 				tit_for_tat_strat[sequence][choice] = rng.getTrueWithProbability(coopProb);
 			} else {
-				tit_for_tat_strat[sequence][choice] = assessment_choices[sequence][choice-1];
+				tit_for_tat_strat[sequence][choice] = opponent_choices[sequence][choice-1];
 			}
 			
 			//Tit-for-two-tats responds to two sequential defections with a defection, otherwise cooperates
 			if (choice <= 1) {
 				tit_for_two_tats_strat[sequence][choice] = rng.getTrueWithProbability(coopProb);
 			} else {
-				bool cooperates = assessment_choices[sequence][choice-1] || assessment_choices[sequence][choice-2];
+				bool cooperates = opponent_choices[sequence][choice-1] || opponent_choices[sequence][choice-2];
 				tit_for_two_tats_strat[sequence][choice] = cooperates;
 			}
 			
@@ -42,7 +48,7 @@ void Strategies::initStrategies()
 			if (choice == 0) {
 				pavlov_like_strat[sequence][choice] = rng.getTrueWithProbability(coopProb);
 			} else {
-				bool cooperates = (assessment_choices[sequence][choice-1] == pavlov_like_strat[sequence][choice-1]);
+				bool cooperates = (opponent_choices[sequence][choice-1] == pavlov_like_strat[sequence][choice-1]);
 				pavlov_like_strat[sequence][choice] = cooperates;
 			}
 		}
@@ -51,7 +57,7 @@ void Strategies::initStrategies()
 	}
 }
 
-/*Returns the player's closest pure strategy*/
+/*Makes the NeuralNetwork play against its virual opponent and returns the its closest pure strategy.*/
 std::string Strategies::closestPureStrategy(NeuralNetwork& player)
 {
 	payoff player_payoff, opponent_payoff; //results of each game iteration
@@ -74,7 +80,7 @@ std::string Strategies::closestPureStrategy(NeuralNetwork& player)
 			
 			//Play subsequent iterations
 			player_cooperates = player(player_payoff, opponent_payoff);
-			opponent_cooperates = assessment_choices[sequence][iteration];
+			opponent_cooperates = opponent_choices[sequence][iteration];
 		}
 		
 		opponentCoopProb += ASSESSMENT_PROB_STEP;
@@ -83,6 +89,9 @@ std::string Strategies::closestPureStrategy(NeuralNetwork& player)
 	return compareChoices();
 }
 
+/*
+Compares the NeuralNetwork's sequence of choices to the pure strategie's.
+Returns the name of the network's closest pure strategy in terms of the least sum of squares.*/
 std::string Strategies::compareChoices()
 {
 	bool (*currStrat)[ASSESSMENT_COUNT][ASSESSMENT_SIZE];	
@@ -90,7 +99,7 @@ std::string Strategies::compareChoices()
 	int bestScore = -1;
 	int bestScoreStratIndex = -1;
 	
-	for (int stratIndex=0; stratIndex<5; stratIndex++) {
+	for (int stratIndex=0; stratIndex<STRAT_COUNT; stratIndex++) {
 		currStrat = all_strats[stratIndex];
 		currScore = 0;
 		
