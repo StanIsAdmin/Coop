@@ -1,6 +1,8 @@
 #ifndef STRATEGIES_H
 #define STRATEGIES_H
 
+#include <array>
+
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
 #include "Payoffs.hpp"
@@ -33,24 +35,24 @@ class Strategies
 	
 		///Choices sequences
 		bool opponent_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //random choices used for assessment
-		bool player_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //assessed NeuralNetwork's choices
-	
-		///Pure strategies move sequences
-		bool always_cooperate_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
-		bool always_defect_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
-		bool tit_for_tat_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
-		bool tit_for_two_tats_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
-		bool pavlov_like_strat[ASSESSMENT_COUNT][ASSESSMENT_SIZE];
 		
-		//array of all move sequences
-		bool (*all_strats[STRAT_COUNT])[ASSESSMENT_COUNT][ASSESSMENT_SIZE] = {&always_cooperate_strat, &always_defect_strat, &tit_for_tat_strat, &tit_for_two_tats_strat, &pavlov_like_strat};
+		///Pure strategies and player's average cooperation per assessment
+		std::array<double, ASSESSMENT_COUNT> always_cooperate_avg;
+		std::array<double, ASSESSMENT_COUNT> always_defect_avg;
+		std::array<double, ASSESSMENT_COUNT> tit_for_tat_avg;
+		std::array<double, ASSESSMENT_COUNT> tit_for_two_tats_avg;
+		std::array<double, ASSESSMENT_COUNT> pavlov_like_avg;
+		std::array<double, ASSESSMENT_COUNT> player_avg;
 		
-		//name of each strategy
-		std::string all_strat_names[STRAT_COUNT];
+		//array of pointers to pure strategie's average cooperations
+		std::array<std::array<double, ASSESSMENT_COUNT>*, STRAT_COUNT> all_avg = {{{&always_cooperate_avg}, {&always_defect_avg}, {&tit_for_tat_avg}, {&tit_for_two_tats_avg}, {&pavlov_like_avg}}};
+		
+		//array of names of each pure strategy
+		const std::array<std::string, STRAT_COUNT> all_strat_names = {{"cooper", "defect", "tittat", "twotat", "pavlov"}};
 		
 		void initStrategies(); //initialize choice sequences and pure strategies
 		
-		std::string compareChoices(); //compares player_choices to each pure strategy
+		std::string compareChoices(); //compares the player's choices to each pure strategy
 		
 	public:
 		Strategies(const GamePayoffs& payoffs);
