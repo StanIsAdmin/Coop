@@ -21,19 +21,18 @@ Simulation::Simulation(const GamePayoffs& payoffs):
 /*Executes one complete simulation with a certain number of generations*/
 void Simulation::run(unsigned int generations)
 {
-	std::cout << "Using RNG seed: " << rng.getSeed();
+	std::cout << "# RNG seed: " << rng.getSeed();
 	if (rng.seedIsRandom())
-		std::cout << " (random)" << std::endl;
+		std::cout << " (random)" << std::endl << std::endl;
 	else
-		std::cout << " (provided)" << std::endl;
+		std::cout << " (provided)" << std::endl << std::endl;
 	
-	std::cout << "Running simulation..." << std::endl;
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
 		playGeneration();
-		assessPopulation(gen_count);
+		assessPopulation();
 		nextGeneration();
 	}
-	std::cout << "Simulation finished!" << std::endl;
+	outputResults(generations);
 }
 
 /*Plays all individuals from this generation against each other*/
@@ -72,6 +71,12 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 		//Play subsequent iterations
 		playerA_cooperates = playerA(playerA_payoff, playerB_payoff);
 		playerB_cooperates = playerB(playerB_payoff, playerA_payoff);
+		
+		//Count total cooperations/defections
+		if (playerA_cooperates) total_cooperations += 1;
+		else total_defections += 1;
+		if (playerB_cooperates) total_cooperations += 1;
+		else total_defections += 1;
 	}
 	
 	//Modify the player's stats accordingly
@@ -102,6 +107,7 @@ void Simulation::nextGeneration()
 		selected_index = new_population_indexes[i]; //index of selected individual
 		new_population[i] = new NeuralNetwork(*population[selected_index]); //copy the NN
 	}
+	
 	//replace the old population, reset their stats, and mutate the new individuals
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		delete population[i];
@@ -110,25 +116,24 @@ void Simulation::nextGeneration()
 		population[i] = new_population[i]; //copy pointer to new NeuralNetwork
 		population[i]->mutate();
 	}
+	
+	total_defections = 0;
+	total_cooperations = 0;
 }
 
 /*Determines the current population's typical strategies and other metrics*/
-void Simulation::assessPopulation(unsigned int generation)
+void Simulation::assessPopulation()
 {
-	std::cout << "----- GENERATION " << generation << std::endl;
-	
-	//Networks
-	std::cout << "- Networks" << std::endl;
-	int averageIntelligence = 0;
+	//Average intelligence & cooperation
+	int intelligenceSum = 0;
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		averageIntelligence += population[i]->getInnerNodeCount();
+		intelligenceSum += population[i]->getInnerNodeCount();
 	}
-	std::cout << "Avg. intel: " << averageIntelligence / static_cast<double>(POPULATION_SIZE) << std::endl;
-	std::cout << std::endl;
+	avg_intelligence += std::to_string(intelligenceSum / static_cast<double>(POPULATION_SIZE)) + " ";
+	avg_cooperation += std::to_string(total_cooperations / static_cast<double>(total_cooperations + total_defections)) + " ";
 	
 	
 	//Strategies
-	std::cout << "- Strategies" << std::endl;
 	std::map<std::string, int> stratCount = {
 		{"cooper", 0},
 		{"defect", 0},
@@ -143,7 +148,33 @@ void Simulation::assessPopulation(unsigned int generation)
  	}
 	
 	for (auto stratCountItr = stratCount.begin(); stratCountItr!=stratCount.end(); stratCountItr++) {
-		std::cout << stratCountItr->first << ": " << stratCountItr->second << std::endl;
+		strategies_count[stratCountItr->first] += std::to_string(stratCountItr->second) + " ";
 	}
-	std::cout << std::endl;
+}
+
+/*Writes the simulation's results to the standard output*/
+void Simulation::outputResults(unsigned int generations)
+{
+	//Average intelligence
+	std::cout << "# name: avg_intelligence" << std::endl;
+	std::cout << "# type: matrix" << std::endl;
+	std::cout << "# rows: " << generations << std::endl;
+	std::cout << "# columns: 1"<< std::endl;
+	std::cout << avg_intelligence << std::endl << std::endl;
+	
+	//Average cooperation
+	std::cout << "# name: avg_cooperation" << std::endl;
+	std::cout << "# type: matrix" << std::endl;
+	std::cout << "# rows: " << generations << std::endl;
+	std::cout << "# columns: 1"<< std::endl;
+	std::cout << avg_cooperation << std::endl << std::endl;
+	
+	//Strategies counts
+	for (auto stratCountItr = strategies_count.begin(); stratCountItr!=strategies_count.end(); stratCountItr++) {
+		std::cout << "# name: count_" << stratCountItr->first << std::endl;
+		std::cout << "# type: matrix" << std::endl;
+		std::cout << "# rows: " << generations << std::endl;
+		std::cout << "# columns: 1"<< std::endl;
+		std::cout << stratCountItr->second << std::endl << std::endl;
+	}
 }

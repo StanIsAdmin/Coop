@@ -28,7 +28,20 @@ class Simulation
 		NeuralNetwork* population[POPULATION_SIZE]; //dynamically allocated NNs
 		unsigned long long population_payoff_sum[POPULATION_SIZE]; //sum of all game payoffs
 		unsigned long long population_game_count[POPULATION_SIZE]; //number of games played
+		unsigned long long total_defections = 0;
+		unsigned long long total_cooperations = 0;
 		std::string population_strategies[POPULATION_SIZE]; //closest pure strategies
+		
+		///Output
+		std::string avg_intelligence = "";
+		std::string avg_cooperation = "";
+		std::map<std::string, std::string> strategies_count = {
+			{"cooper", ""},
+			{"defect", ""},
+			{"tittat", ""},
+			{"twotat", ""},
+			{"pavlov", ""}
+		};
 		
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
@@ -40,7 +53,8 @@ class Simulation
 		void nextGeneration(); //replaces the current generation by the next one
 		
 		///Population assessment
-		void assessPopulation(unsigned int generation); //assigns to each network its closest pure strategy
+		void assessPopulation(); //assigns to each network its closest pure strategy
+		void outputResults(unsigned int generations); //prints the simulation results
 	
 	public:
 		Simulation(const GamePayoffs& payoffs);

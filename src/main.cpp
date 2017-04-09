@@ -12,7 +12,7 @@ void runSimulation(int sim_rounds, std::string game_type);
 int main(int argc, char** argv)
 {
 	if (argc == 1) {
-		std::cout << "Error: no args provided" << std::endl;
+		std::cerr << "Error: no args provided" << std::endl;
 		return 1;
 	}
 	else if (std::string(argv[1]) == "test" and argc == 2) {
@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 		runSimulation(atoi(argv[2]), std::string(argv[3]));		
 	}
 	else {
-		std::cout << "Error: unknown options" << std::endl;
+		std::cerr << "Error: unknown options" << std::endl;
 		return 1;
 	}
 	
@@ -53,12 +53,12 @@ void runSimulation(int sim_rounds, std::string game_type)
 		sim_payoffs.self_cooperates_other_defects = 2;
 	}
 	else {
-		std::cout << "Error: unknown game" << std::endl;
+		std::cerr << "Error: unknown game" << std::endl;
 		return;
 	}
 	
-	std::cout << "Game: " << game_type << std::endl;
-	std::cout << "Rounds: " << sim_rounds << std::endl;
+	std::cout << "# Game: " << game_type << std::endl;
+	std::cout << "# Rounds: " << sim_rounds << std::endl;
 	
 	Simulation sim(sim_payoffs);
 	sim.run(sim_rounds);
