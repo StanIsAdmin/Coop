@@ -10,8 +10,12 @@
 #define ASSESSMENT_COUNT 5
 #define ASSESSMENT_SIZE 20
 #define ASSESSMENT_PROB_STEP 0.25
-#define STRAT_COUNT 5
-
+#define STRATEGIES_COUNT 5
+#define STRATEGIES_ALWAYS_COOPERATE 0
+#define STRATEGIES_ALWAYS_DEFECT 1
+#define STRATEGIES_TIT_FOR_TAT 2
+#define STRATEGIES_TIT_FOR_TWO_TATS 3
+#define STRATEGIES_PAVLOV_LIKE 4
 
 /*
 Defines multiple decision patterns called "strategies", which allow us to categorize NeuralNetworks.
@@ -37,28 +41,18 @@ class Strategies
 		bool opponent_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //random choices used for assessment
 		
 		///Pure strategies and player's average cooperation per assessment
-		std::array<double, ASSESSMENT_COUNT> always_cooperate_avg;
-		std::array<double, ASSESSMENT_COUNT> always_defect_avg;
-		std::array<double, ASSESSMENT_COUNT> tit_for_tat_avg;
-		std::array<double, ASSESSMENT_COUNT> tit_for_two_tats_avg;
-		std::array<double, ASSESSMENT_COUNT> pavlov_like_avg;
-		std::array<double, ASSESSMENT_COUNT> player_avg;
-		
-		//array of pointers to pure strategie's average cooperations
-		std::array<std::array<double, ASSESSMENT_COUNT>*, STRAT_COUNT> all_avg = {{{&always_cooperate_avg}, {&always_defect_avg}, {&tit_for_tat_avg}, {&tit_for_two_tats_avg}, {&pavlov_like_avg}}};
-		
-		//array of names of each pure strategy
-		const std::array<std::string, STRAT_COUNT> all_strat_names = {{"cooper", "defect", "tittat", "twotat", "pavlov"}};
+		std::array<std::array<double, ASSESSMENT_COUNT>, STRATEGIES_COUNT> strats_avg_coop;
+		std::array<double, ASSESSMENT_COUNT> player_avg_coop;
 		
 		void initStrategies(); //initialize choice sequences and pure strategies
 		
-		std::string compareChoices(); //compares the player's choices to each pure strategy
+		int compareChoices(); //compares the player's choices to each pure strategy
 		
 	public:
 		Strategies(const GamePayoffs& payoffs);
 		
 		//returns the player's closest pure strategy
-		std::string closestPureStrategy(NeuralNetwork& player);
+		int closestPureStrategy(NeuralNetwork& player);
 		
 };
 

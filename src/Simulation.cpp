@@ -107,24 +107,14 @@ void Simulation::assessPopulation()
 	pop_fitness += "\n";
 	
 	//Average cooperation frequency
-	avg_cooperation += std::to_string(total_cooperations / static_cast<double>(total_cooperations + total_defections)) + "\n";	
+	avg_cooperation += std::to_string(static_cast<double>(total_cooperations) / static_cast<double>(total_cooperations + total_defections)) + "\n";
 	
 	//Strategy counts
-	std::map<std::string, int> stratCount = {
-		{"cooper", 0},
-		{"defect", 0},
-		{"tittat", 0},
-		{"twotat", 0},
-		{"pavlov", 0}
-	};
-	
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		population_strategies[i] = strats.closestPureStrategy(*(population[i]));
-		stratCount[population_strategies[i]] += 1;
+		population_strategies[strats.closestPureStrategy(*(population[i]))] += 1;
  	}
-	
-	for (auto stratCountItr = stratCount.begin(); stratCountItr!=stratCount.end(); stratCountItr++) {
-		strategies_count[stratCountItr->first] += std::to_string(stratCountItr->second) + "\n";
+	for (int i=0; i<STRATEGIES_COUNT; ++i) {
+		strategies_counts[i] += std::to_string(population_strategies[i]) + "\n";
 	}
 }
 
@@ -150,6 +140,11 @@ void Simulation::nextGeneration()
 		population_payoff_sum[i] = 0;
 		population[i] = new_population[i]; //copy pointer to new NeuralNetwork
 		population[i]->mutate();
+	}
+	
+	//reset strategies counts
+	for (int i=0; i<STRATEGIES_COUNT; ++i) {
+		population_strategies[i] = 0;
 	}
 	
 	total_defections = 0;
@@ -181,11 +176,11 @@ void Simulation::outputResults(unsigned int generations)
 	std::cout << avg_cooperation << std::endl;
 	
 	//Strategies counts
-	for (auto stratCountItr = strategies_count.begin(); stratCountItr!=strategies_count.end(); stratCountItr++) {
-		std::cout << "# name: count_" << stratCountItr->first << std::endl;
+	for (int i=0; i<STRATEGIES_COUNT; ++i) {
+		std::cout << "# name: count_" << strategies_names[i] << std::endl;
 		std::cout << "# type: matrix" << std::endl;
 		std::cout << "# rows: " << generations << std::endl;
 		std::cout << "# columns: 1" << std::endl;
-		std::cout << stratCountItr->second << std::endl;
+		std::cout << strategies_counts[i] << std::endl;
 	}
 }

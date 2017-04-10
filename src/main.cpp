@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <ctime>
 
 void runTests();
 void runSimulation(int sim_rounds, std::string game_type);
@@ -60,6 +61,11 @@ void runSimulation(int sim_rounds, std::string game_type)
 	std::cout << "# Game: " << game_type << std::endl;
 	std::cout << "# Rounds: " << sim_rounds << std::endl;
 	
+	time_t sim_start = clock();
+	
 	Simulation sim(sim_payoffs);
 	sim.run(sim_rounds);
+	
+	time_t sim_end = clock();
+	std::cout << "# Simulation time: " << static_cast<double>(sim_end - sim_start)/CLOCKS_PER_SEC << std::endl;
 }

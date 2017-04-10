@@ -3,7 +3,6 @@
 
 #include <array>
 #include <iostream>
-#include <map>
 
 #include "NeuralNetwork.hpp"
 #include "Rng.hpp"
@@ -26,24 +25,21 @@ class Simulation
 		
 		///Population
 		NeuralNetwork* population[POPULATION_SIZE]; //dynamically allocated NNs
-		unsigned long long population_payoff_sum[POPULATION_SIZE]; //sum of all game payoffs
-		unsigned long long population_game_count[POPULATION_SIZE]; //number of games played
-		unsigned long long total_defections = 0;
-		unsigned long long total_cooperations = 0;
+		unsigned long int population_payoff_sum[POPULATION_SIZE]; //sum of all game payoffs
+		unsigned long int population_game_count[POPULATION_SIZE]; //number of games played
+		unsigned long int total_defections = 0;
+		unsigned long int total_cooperations = 0;
 		std::array<double, POPULATION_SIZE> population_fitness;
-		std::string population_strategies[POPULATION_SIZE]; //closest pure strategies
+		unsigned int population_strategies[STRATEGIES_COUNT]; //closest pure strategies
 		
 		///Output
 		std::string pop_intelligence = "";
 		std::string pop_fitness = "";
 		std::string avg_cooperation = "";
-		std::map<std::string, std::string> strategies_count = {
-			{"cooper", ""},
-			{"defect", ""},
-			{"tittat", ""},
-			{"twotat", ""},
-			{"pavlov", ""}
-		};
+		std::array<std::string, STRATEGIES_COUNT> strategies_counts;
+		
+		//strategy names, in same order as defined in "Strategies.hpp"
+		const std::array<std::string, STRATEGIES_COUNT> strategies_names = {{"cooper", "defect", "tittat", "twotat", "pavlov"}}; 
 		
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
