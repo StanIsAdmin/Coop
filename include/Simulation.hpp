@@ -44,6 +44,7 @@ class Simulation
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 		
+		void resetGenerationCounters();
 		void playGeneration(); //play all games for the entire generation
 		void playEachOther(int playerAIndex, int playerBIndex); //play a number of rounds between two players
 		

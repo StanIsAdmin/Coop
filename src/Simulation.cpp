@@ -21,19 +21,41 @@ Simulation::Simulation(const GamePayoffs& payoffs):
 /*Executes one complete simulation with a certain number of generations*/
 void Simulation::run(unsigned int generations)
 {
+	//output the RNG seed and its randomness for future reference
 	std::cout << "# RNG seed: " << rng.getSeed();
 	if (rng.seedIsRandom())
 		std::cout << " (random)" << std::endl << std::endl;
 	else
 		std::cout << " (provided)" << std::endl << std::endl;
 	
+	//main loop of simulation
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
+		resetGenerationCounters();
 		playGeneration();
 		evaluatePopulationFitness();
 		assessPopulation();
 		nextGeneration();
 	}
 	outputResults(generations);
+}
+
+/*Resets all generation-specific counters*/
+void Simulation::resetGenerationCounters()
+{
+	//population-wide counters
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population_payoff_sum[i] = 0;
+		population_game_count[i] = 0;
+	}
+	
+	//strategy-wide counters
+	for (int i=0; i<STRATEGIES_COUNT; ++i) {
+		population_strategies[i] = 0;
+	}
+	
+	//unique counters
+	total_defections = 0;
+	total_cooperations = 0;
 }
 
 /*Plays all individuals from this generation against each other*/
@@ -135,21 +157,13 @@ void Simulation::nextGeneration()
 	
 	//replace the old population, reset their stats, and mutate the new individuals
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		delete population[i];
-		population_game_count[i] = 0;
-		population_payoff_sum[i] = 0;
+		delete population[i]; //delete previous NeuralNetwork
 		population[i] = new_population[i]; //copy pointer to new NeuralNetwork
-		population[i]->mutate();
+		population[i]->mutate(); //mutate new NeuralNetwork
 	}
-	
-	//reset strategies counts
-	for (int i=0; i<STRATEGIES_COUNT; ++i) {
-		population_strategies[i] = 0;
-	}
-	
-	total_defections = 0;
-	total_cooperations = 0;
 }
+
+
 
 /*Writes the simulation's results to the standard output*/
 void Simulation::outputResults(unsigned int generations)

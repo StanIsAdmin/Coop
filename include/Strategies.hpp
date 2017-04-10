@@ -10,12 +10,14 @@
 #define ASSESSMENT_COUNT 5
 #define ASSESSMENT_SIZE 20
 #define ASSESSMENT_PROB_STEP 0.25
-#define STRATEGIES_COUNT 5
+
+/*List of pure strategies and their unique index*/
 #define STRATEGIES_ALWAYS_COOPERATE 0
 #define STRATEGIES_ALWAYS_DEFECT 1
 #define STRATEGIES_TIT_FOR_TAT 2
 #define STRATEGIES_TIT_FOR_TWO_TATS 3
 #define STRATEGIES_PAVLOV_LIKE 4
+#define STRATEGIES_COUNT 5
 
 /*
 Defines multiple decision patterns called "strategies", which allow us to categorize NeuralNetworks.
