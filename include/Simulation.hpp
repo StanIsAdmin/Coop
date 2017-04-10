@@ -30,10 +30,12 @@ class Simulation
 		unsigned long long population_game_count[POPULATION_SIZE]; //number of games played
 		unsigned long long total_defections = 0;
 		unsigned long long total_cooperations = 0;
+		std::array<double, POPULATION_SIZE> population_fitness;
 		std::string population_strategies[POPULATION_SIZE]; //closest pure strategies
 		
 		///Output
-		std::string avg_intelligence = "";
+		std::string pop_intelligence = "";
+		std::string pop_fitness = "";
 		std::string avg_cooperation = "";
 		std::map<std::string, std::string> strategies_count = {
 			{"cooper", ""},
@@ -49,11 +51,14 @@ class Simulation
 		void playGeneration(); //play all games for the entire generation
 		void playEachOther(int playerAIndex, int playerBIndex); //play a number of rounds between two players
 		
+		///Population assessment
+		void evaluatePopulationFitness();
+		void assessPopulation(); //assigns to each network its closest pure strategy
+		
 		///Selection
 		void nextGeneration(); //replaces the current generation by the next one
 		
-		///Population assessment
-		void assessPopulation(); //assigns to each network its closest pure strategy
+		///Simulation output
 		void outputResults(unsigned int generations); //prints the simulation results
 	
 	public:

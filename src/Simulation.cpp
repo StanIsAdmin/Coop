@@ -29,6 +29,7 @@ void Simulation::run(unsigned int generations)
 	
 	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
 		playGeneration();
+		evaluatePopulationFitness();
 		assessPopulation();
 		nextGeneration();
 	}
@@ -86,16 +87,50 @@ void Simulation::playEachOther(int playerAIndex, int playerBIndex)
 	population_game_count[playerBIndex] += round_iterations;
 }
 
+void Simulation::evaluatePopulationFitness()
+{
+	//calculate fitness based on mean payoff per round
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
+	}
+}
+
+/*Determines the current population's typical strategies and other metrics*/
+void Simulation::assessPopulation()
+{
+	//Population intelligence and fitness
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		pop_intelligence += std::to_string(population[i]->getInnerNodeCount()) + " ";
+		pop_fitness += std::to_string(population_fitness[i]) + " ";
+	}
+	pop_intelligence += "\n";
+	pop_fitness += "\n";
+	
+	//Average cooperation frequency
+	avg_cooperation += std::to_string(total_cooperations / static_cast<double>(total_cooperations + total_defections)) + "\n";	
+	
+	//Strategy counts
+	std::map<std::string, int> stratCount = {
+		{"cooper", 0},
+		{"defect", 0},
+		{"tittat", 0},
+		{"twotat", 0},
+		{"pavlov", 0}
+	};
+	
+	for (int i=0; i<POPULATION_SIZE; ++i) {
+		population_strategies[i] = strats.closestPureStrategy(*(population[i]));
+		stratCount[population_strategies[i]] += 1;
+ 	}
+	
+	for (auto stratCountItr = stratCount.begin(); stratCountItr!=stratCount.end(); stratCountItr++) {
+		strategies_count[stratCountItr->first] += std::to_string(stratCountItr->second) + "\n";
+	}
+}
+
 /*Replaces the current generation by selection based on fitness followed by mutation*/
 void Simulation::nextGeneration()
 {	
-	//calculate fitness based on mean payoff per round
-	std::array<double, POPULATION_SIZE> population_fitness;
-	for (int i=0; i<POPULATION_SIZE; ++i) {
-		
-		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
-	}
-	
 	//select population with probability proportional to individual's fitness
 	std::array<int, POPULATION_SIZE> new_population_indexes;
 	rng.selectPopulation<POPULATION_SIZE>(population_fitness, new_population_indexes);
@@ -121,60 +156,36 @@ void Simulation::nextGeneration()
 	total_cooperations = 0;
 }
 
-/*Determines the current population's typical strategies and other metrics*/
-void Simulation::assessPopulation()
-{
-	//Average intelligence & cooperation
-	int intelligenceSum = 0;
-	for (int i=0; i<POPULATION_SIZE; ++i) {
-		intelligenceSum += population[i]->getInnerNodeCount();
-	}
-	avg_intelligence += std::to_string(intelligenceSum / static_cast<double>(POPULATION_SIZE)) + " ";
-	avg_cooperation += std::to_string(total_cooperations / static_cast<double>(total_cooperations + total_defections)) + " ";
-	
-	
-	//Strategies
-	std::map<std::string, int> stratCount = {
-		{"cooper", 0},
-		{"defect", 0},
-		{"tittat", 0},
-		{"twotat", 0},
-		{"pavlov", 0}
-	};
-	
-	for (int i=0; i<POPULATION_SIZE; ++i) {
-		population_strategies[i] = strats.closestPureStrategy(*(population[i]));
-		stratCount[population_strategies[i]] += 1;
- 	}
-	
-	for (auto stratCountItr = stratCount.begin(); stratCountItr!=stratCount.end(); stratCountItr++) {
-		strategies_count[stratCountItr->first] += std::to_string(stratCountItr->second) + " ";
-	}
-}
-
 /*Writes the simulation's results to the standard output*/
 void Simulation::outputResults(unsigned int generations)
 {
-	//Average intelligence
-	std::cout << "# name: avg_intelligence" << std::endl;
+	//Population intelligence
+	std::cout << "# name: pop_intelligence" << std::endl;
 	std::cout << "# type: matrix" << std::endl;
 	std::cout << "# rows: " << generations << std::endl;
-	std::cout << "# columns: 1"<< std::endl;
-	std::cout << avg_intelligence << std::endl << std::endl;
+	std::cout << "# columns: "<< POPULATION_SIZE << std::endl;
+	std::cout << pop_intelligence << std::endl;
+	
+	//Population fitness
+	std::cout << "# name: pop_fitness" << std::endl;
+	std::cout << "# type: matrix" << std::endl;
+	std::cout << "# rows: " << generations << std::endl;
+	std::cout << "# columns: "<< POPULATION_SIZE << std::endl;
+	std::cout << pop_fitness << std::endl;
 	
 	//Average cooperation
 	std::cout << "# name: avg_cooperation" << std::endl;
 	std::cout << "# type: matrix" << std::endl;
 	std::cout << "# rows: " << generations << std::endl;
-	std::cout << "# columns: 1"<< std::endl;
-	std::cout << avg_cooperation << std::endl << std::endl;
+	std::cout << "# columns: 1" << std::endl;
+	std::cout << avg_cooperation << std::endl;
 	
 	//Strategies counts
 	for (auto stratCountItr = strategies_count.begin(); stratCountItr!=strategies_count.end(); stratCountItr++) {
 		std::cout << "# name: count_" << stratCountItr->first << std::endl;
 		std::cout << "# type: matrix" << std::endl;
 		std::cout << "# rows: " << generations << std::endl;
-		std::cout << "# columns: 1"<< std::endl;
-		std::cout << stratCountItr->second << std::endl << std::endl;
+		std::cout << "# columns: 1" << std::endl;
+		std::cout << stratCountItr->second << std::endl;
 	}
 }
