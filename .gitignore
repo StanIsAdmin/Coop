@@ -1,5 +1,8 @@
 bin/
 
+*.jpg
+*.log
+
 # Compiled Object files
 *.slo
 *.lo
