@@ -62,15 +62,15 @@ class NeuralNetwork
 		bool cooperate_by_default; //used for decision-making in first round
 		numval output_node_threshold; //same use as inner nodes thresholds
 		
-		unsigned int cognitive_node_count = 0;
-		unsigned int context_node_count = 0;
+		int cognitive_node_count = 0;
+		int context_node_count = 0;
 		
 		std::vector<InnerNode*> inner_nodes; //Neural network's hidden layer nodes
 		std::vector<numval> link_weights_from_self_payoff; //link weights between first input and nodes
 		std::vector<numval> link_weights_from_other_payoff; //...between second input and nodes
 		std::vector<numval> link_weights_from_inner_nodes; //...between nodes and output
 		
-		unsigned int getRandomCognitiveNode(bool withContext);
+		int getRandomCognitiveNode(bool withContext);
 	
 	public:
 		///Constructors

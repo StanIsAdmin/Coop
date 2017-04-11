@@ -5,16 +5,16 @@
 RNG Simulation::rng = RNG();
 
 Simulation::Simulation(const GamePayoffs& payoffs):
-	strats(payoffs), //strategy evaluation
-	population(), //nullptr array
-	population_payoff_sum(), //array of 0s
-	population_game_count(), //array of 0s
-	game_payoffs(payoffs) //use provided payoffs
+	game_payoffs(payoffs), //use provided payoffs
+	strats(payoffs), //strategy evaluation class
+	nn_population(), //nullptr array
+	nn_game_counts(), //arrays of 0s
+	nn_payoff_sums()
 {
 	//create initial population of NeuralNetworks
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		//NNs are initialized with random structures (as specified)
-		population[i] = new NeuralNetwork();
+		nn_population[i] = new NeuralNetwork();
 	}
 }
 
@@ -28,173 +28,173 @@ void Simulation::run(unsigned int generations)
 	else
 		std::cout << " (provided)" << std::endl << std::endl;
 	
+	//reserve array capacity for output data (optimisation)
+	population_intelligence.reserve(generations);
+	population_fitness.reserve(generations);
+	cooperation_defection.reserve(generations);
+	strategies_count.reserve(generations);
+	
 	//main loop of simulation
-	for (unsigned int gen_count=0; gen_count<generations; ++gen_count) {
-		resetGenerationCounters();
+	for (unsigned int i=0; i<generations; ++i) {
+		presetCounters();
 		playGeneration();
-		evaluatePopulationFitness();
 		assessPopulation();
 		nextGeneration();
 	}
-	outputResults(generations);
+	outputResults();
 }
 
 /*Resets all generation-specific counters*/
-void Simulation::resetGenerationCounters()
+void Simulation::presetCounters()
 {
-	//population-wide counters
+	//population counters
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		population_payoff_sum[i] = 0;
-		population_game_count[i] = 0;
+		nn_game_counts[i] = 0;
+		nn_payoff_sums[i] = 0;
 	}
-	
-	//strategy-wide counters
-	for (int i=0; i<STRATEGIES_COUNT; ++i) {
-		population_strategies[i] = 0;
-	}
-	
-	//unique counters
-	total_defections = 0;
 	total_cooperations = 0;
+	total_defections = 0;
+	
+	//output data
+	population_intelligence.emplace_back();
+	population_fitness.emplace_back();
+	cooperation_defection.emplace_back();
+	strategies_count.emplace_back();
 }
 
 /*Plays all individuals from this generation against each other*/
 void Simulation::playGeneration()
 {
 	//Iterate over every possible pair of players from the population
-	for (int playerAIndex=0; playerAIndex<POPULATION_SIZE-1; ++playerAIndex) {
-		for (int playerBIndex=playerAIndex+1; playerBIndex<POPULATION_SIZE; ++playerBIndex) {
-			playEachOther(playerAIndex, playerBIndex);
+	for (int index_a=0; index_a<POPULATION_SIZE-1; ++index_a) {
+		for (int index_b=index_a+1; index_b<POPULATION_SIZE; ++index_b) {
+			playEachOther(index_a, index_b);
 		}
 	}
 }
 
 /*Plays two individuals against each other for a number of iterations (or "rounds")*/
-void Simulation::playEachOther(int playerAIndex, int playerBIndex)
+void Simulation::playEachOther(int index_a, int index_b)
 {
-	NeuralNetwork& playerA(*population[playerAIndex]);
-	NeuralNetwork& playerB(*population[playerBIndex]);
+	NeuralNetwork& player_a(*nn_population[index_a]);
+	NeuralNetwork& player_b(*nn_population[index_b]);
 	
-	payoff playerA_payoff, playerB_payoff; //results of each game iteration
-	unsigned long long playerA_payoff_sum(0), playerB_payoff_sum(0); //sum of all payoffs
+	payoff player_a_payoff, player_b_payoff; //results of each game iteration
+	unsigned long player_a_payoff_sum(0), player_b_payoff_sum(0); //sum of all game payoffs
 	
 	//Play initial iteration (no input)
-	bool playerA_cooperates = playerA();
-	bool playerB_cooperates = playerB();
+	bool player_a_cooperates = player_a();
+	bool player_b_cooperates = player_b();
 	
 	//Play a random number of iterations (mean is 50)
 	int round_iterations = rng.getIterationCount();
 	
 	for (int iteration=0; iteration<round_iterations; ++iteration) {
-		//Gather payoffs from individual's decisions
-		game_payoffs.payoffsFromChoices(playerA_cooperates, playerB_cooperates, playerA_payoff, playerB_payoff);
-		playerA_payoff_sum += playerA_payoff;
-		playerB_payoff_sum += playerB_payoff;
+		//count each player's cooperations
+		if (player_a_cooperates) total_cooperations += 1;
+		else total_defections += 1;
+		if (player_b_cooperates) total_cooperations += 1;
+		else total_defections += 1;
+		
+		//gather payoffs from individual's decisions
+		game_payoffs.payoffsFromChoices(player_a_cooperates, player_b_cooperates, player_a_payoff, player_b_payoff);
+		
+		//add payoffs to player's stats
+		player_a_payoff_sum += player_a_payoff;
+		player_b_payoff_sum += player_b_payoff;
 		
 		//Play subsequent iterations
-		playerA_cooperates = playerA(playerA_payoff, playerB_payoff);
-		playerB_cooperates = playerB(playerB_payoff, playerA_payoff);
-		
-		//Count total cooperations/defections
-		if (playerA_cooperates) total_cooperations += 1;
-		else total_defections += 1;
-		if (playerB_cooperates) total_cooperations += 1;
-		else total_defections += 1;
+		player_a_cooperates = player_a(player_a_payoff, player_b_payoff);
+		player_b_cooperates = player_b(player_b_payoff, player_a_payoff);
 	}
 	
-	//Modify the player's stats accordingly
-	population_payoff_sum[playerAIndex] += playerA_payoff_sum;
-	population_payoff_sum[playerBIndex] += playerB_payoff_sum;
-	population_game_count[playerAIndex] += round_iterations;
-	population_game_count[playerBIndex] += round_iterations;
-}
-
-void Simulation::evaluatePopulationFitness()
-{
-	//calculate fitness based on mean payoff per round
-	for (int i=0; i<POPULATION_SIZE; ++i) {
-		population_fitness[i] = (double(population_payoff_sum[i])/double(population_game_count[i])) - (NODE_FITNESS_PENALTY * population[i]->getInnerNodeCount());
-	}
+	//Modify the player's counters accordingly
+	nn_game_counts[index_a] += round_iterations;
+	nn_game_counts[index_b] += round_iterations;
+	nn_payoff_sums[index_a] += player_a_payoff_sum;
+	nn_payoff_sums[index_b] += player_b_payoff_sum;
 }
 
 /*Determines the current population's typical strategies and other metrics*/
 void Simulation::assessPopulation()
 {
-	//Population intelligence and fitness
-	for (int i=0; i<POPULATION_SIZE; ++i) {
-		pop_intelligence += std::to_string(population[i]->getInnerNodeCount()) + " ";
-		pop_fitness += std::to_string(population_fitness[i]) + " ";
-	}
-	pop_intelligence += "\n";
-	pop_fitness += "\n";
+	//references to output arrays corresponding to current generation
+	std::array<int, POPULATION_SIZE>& current_intelligence = population_intelligence.back();
+	std::array<double, POPULATION_SIZE>& current_fitness = population_fitness.back();
+	std::array<int, STRATEGIES_COUNT>& current_strategies = strategies_count.back();
+	std::array<long long int, 2>& current_coop_defect = cooperation_defection.back();
 	
-	//Average cooperation frequency
-	avg_cooperation += std::to_string(static_cast<double>(total_cooperations) / static_cast<double>(total_cooperations + total_defections)) + "\n";
-	
-	//Strategy counts
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		population_strategies[strats.closestPureStrategy(*(population[i]))] += 1;
- 	}
-	for (int i=0; i<STRATEGIES_COUNT; ++i) {
-		strategies_counts[i] += std::to_string(population_strategies[i]) + "\n";
+		
+		//intelligence
+		current_intelligence[i] = nn_population[i]->getInnerNodeCount();
+		
+		//fitness
+		current_fitness[i] = (static_cast<double>(nn_payoff_sums[i])/static_cast<double>(nn_game_counts[i])) 
+			- (NODE_FITNESS_PENALTY * current_intelligence[i]);
+			
+		//strategy
+		current_strategies[strats.closestPureStrategy(*(nn_population[i]))] += 1;
 	}
+	//average cooperation frequency
+	current_coop_defect[0] = static_cast<long long int>(total_cooperations);
+	current_coop_defect[1] = static_cast<long long int>(total_defections);
 }
 
 /*Replaces the current generation by selection based on fitness followed by mutation*/
 void Simulation::nextGeneration()
 {	
-	//select population with probability proportional to individual's fitness
+	//select individuals to reproduce with probability proportional to their fitness
 	std::array<int, POPULATION_SIZE> new_population_indexes;
-	rng.selectPopulation<POPULATION_SIZE>(population_fitness, new_population_indexes);
+	rng.selectPopulation<POPULATION_SIZE>(population_fitness.back(), new_population_indexes);
 	
 	//create the new population with the new selection
 	NeuralNetwork* new_population[POPULATION_SIZE];
 	int selected_index;
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		selected_index = new_population_indexes[i]; //index of selected individual
-		new_population[i] = new NeuralNetwork(*population[selected_index]); //copy the NN
+		new_population[i] = new NeuralNetwork(*nn_population[selected_index]); //copy the NN
 	}
 	
-	//replace the old population, reset their stats, and mutate the new individuals
+	//replace the old population and mutate the new individuals
 	for (int i=0; i<POPULATION_SIZE; ++i) {
-		delete population[i]; //delete previous NeuralNetwork
-		population[i] = new_population[i]; //copy pointer to new NeuralNetwork
-		population[i]->mutate(); //mutate new NeuralNetwork
+		delete nn_population[i]; //delete previous NeuralNetwork
+		nn_population[i] = new_population[i]; //copy pointer to new NeuralNetwork
+		nn_population[i]->mutate(); //mutate new NeuralNetwork
 	}
 }
 
-
+template<typename T, int N>
+void printMatrix(const std::vector<std::array<T, N>>& matrix, std::string variable_name)
+{
+	std::string output = "";
+	output += "# name: " + variable_name + "\n";
+	output += "# type: matrix\n";
+	output += "# rows: " + std::to_string(matrix.size()) + "\n";
+	output += "# columns: " + std::to_string(N) + "\n";
+	
+	for (unsigned int row=0; row<matrix.size(); ++row) {
+		for (unsigned int col=0; col<N; ++col) {
+			output += std::to_string(matrix[row][col]) + " ";
+		}
+		output += "\n";
+	}
+	output += "\n";
+	std::cout << output;
+}
 
 /*Writes the simulation's results to the standard output*/
-void Simulation::outputResults(unsigned int generations)
+void Simulation::outputResults()
 {
-	//Population intelligence
-	std::cout << "# name: pop_intelligence" << std::endl;
-	std::cout << "# type: matrix" << std::endl;
-	std::cout << "# rows: " << generations << std::endl;
-	std::cout << "# columns: "<< POPULATION_SIZE << std::endl;
-	std::cout << pop_intelligence << std::endl;
+	//Intelligence
+	printMatrix<int, POPULATION_SIZE>(population_intelligence, std::string("pop_intelligence"));
 	
-	//Population fitness
-	std::cout << "# name: pop_fitness" << std::endl;
-	std::cout << "# type: matrix" << std::endl;
-	std::cout << "# rows: " << generations << std::endl;
-	std::cout << "# columns: "<< POPULATION_SIZE << std::endl;
-	std::cout << pop_fitness << std::endl;
+	//Fitness
+	printMatrix<double, POPULATION_SIZE>(population_fitness, std::string("pop_fitness"));
 	
 	//Average cooperation
-	std::cout << "# name: avg_cooperation" << std::endl;
-	std::cout << "# type: matrix" << std::endl;
-	std::cout << "# rows: " << generations << std::endl;
-	std::cout << "# columns: 1" << std::endl;
-	std::cout << avg_cooperation << std::endl;
+	printMatrix<long long int, 2>(cooperation_defection, std::string("cooperation_defection"));
 	
-	//Strategies counts
-	for (int i=0; i<STRATEGIES_COUNT; ++i) {
-		std::cout << "# name: count_" << strategies_names[i] << std::endl;
-		std::cout << "# type: matrix" << std::endl;
-		std::cout << "# rows: " << generations << std::endl;
-		std::cout << "# columns: 1" << std::endl;
-		std::cout << strategies_counts[i] << std::endl;
-	}
+	//Strategies
+	printMatrix<int, STRATEGIES_COUNT>(strategies_count, std::string("strategies_count"));
 }

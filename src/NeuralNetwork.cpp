@@ -96,7 +96,7 @@ NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	link_weights_from_inner_nodes(nn.link_weights_from_inner_nodes)
 {
 	//Create new inner nodes by copying nn's inner nodes
-	for (unsigned int i=0; i<nn.cognitive_node_count; ++i) {
+	for (int i=0; i<nn.cognitive_node_count; ++i) {
 		inner_nodes.push_back(new InnerNode(*nn.inner_nodes[i]));
 	}
 	assert(getInnerNodeCount() >= 0 and getInnerNodeCount() <= MAXNODES*2);
@@ -105,24 +105,24 @@ NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 /*Destructor*/
 NeuralNetwork::~NeuralNetwork()
 {
-	for (unsigned int i=0; i<cognitive_node_count; ++i) {
+	for (int i=0; i<cognitive_node_count; ++i) {
 		delete inner_nodes[i];
 	}
 }
 
-unsigned int NeuralNetwork::getRandomCognitiveNode(bool withContext)
+int NeuralNetwork::getRandomCognitiveNode(bool withContext)
 {
 	//Find which cognitive nodes have or do not have a context (depending on withContext)
 	std::vector<int> nodeSelection(0);
-	for (unsigned int i=0; i<cognitive_node_count; ++i) {
+	for (int i=0; i<cognitive_node_count; ++i) {
 		if (inner_nodes[i]->hasContextNode() == withContext)
 			nodeSelection.push_back(i);
 	}
 	
 	if (withContext)
-		assert(context_node_count == nodeSelection.size());
+		assert(context_node_count == static_cast<int>(nodeSelection.size()));
 	else
-		assert(cognitive_node_count - context_node_count == nodeSelection.size());
+		assert(cognitive_node_count - context_node_count == static_cast<int>(nodeSelection.size()));
 	
 	//Choose random cognitive node from the context-free list
 	unsigned int chosen_context_node = nodeSelection[rng.getRandomInt(0, static_cast<int>(nodeSelection.size())-1)];
@@ -174,7 +174,7 @@ If the maximum amount of cognitive nodes is already reached, assertion fails.*/
 void NeuralNetwork::addCognitiveNode()
 {
 	assert(cognitive_node_count < MAXNODES);
-	assert(cognitive_node_count == inner_nodes.size());
+	assert(cognitive_node_count == static_cast<int>(inner_nodes.size()));
 	
 	//Add cognitive node to the network (random threshold)
 	numval threshold_value = rng.getRandomNumval();
@@ -210,7 +210,7 @@ void NeuralNetwork::removeContextNode()
 	assert(context_node_count > 0 and cognitive_node_count >= context_node_count);
 	
 	//Get random cognitive node that DOES have a context
-	unsigned int chosen_context_node = getRandomCognitiveNode(true);
+	int chosen_context_node = getRandomCognitiveNode(true);
 	
 	//Remove context node from one cognitive node
 	inner_nodes[chosen_context_node]->removeContextNode();
@@ -219,10 +219,10 @@ void NeuralNetwork::removeContextNode()
 
 void NeuralNetwork::removeCognitiveNode()
 {
-	assert(cognitive_node_count > 0 and cognitive_node_count == inner_nodes.size());
+	assert(cognitive_node_count > 0 and cognitive_node_count == static_cast<int>(inner_nodes.size()));
 	
 	//Choose random cognitive node
-	unsigned int chosen_cognitive_node = rng.getRandomInt(0, cognitive_node_count-1);
+	int chosen_cognitive_node = rng.getRandomInt(0, cognitive_node_count-1);
 	
 	//If cognitive node has context node, uncount it
 	cognitive_node_count--;
@@ -242,7 +242,7 @@ void NeuralNetwork::removeCognitiveNode()
 void NeuralNetwork::mutate()
 {
 	///Modify numeric values
-	for (unsigned int i=0; i<cognitive_node_count; i++) {
+	for (int i=0; i<cognitive_node_count; i++) {
 		///Link weights
 		//From self payoff to inner nodes
 		if (rng.getRandomProbability() < value_mutation_prob) {
@@ -301,7 +301,7 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 	
 	//Use inner nodes to compute output
 	numval output = 0;
-	for (unsigned int i=0; i<cognitive_node_count; ++i) {
+	for (int i=0; i<cognitive_node_count; ++i) {
 		numval selfInput = self * link_weights_from_self_payoff[i];
 		numval otherInput = other * link_weights_from_other_payoff[i];
 		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];

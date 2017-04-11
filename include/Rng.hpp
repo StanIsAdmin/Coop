@@ -10,6 +10,7 @@
 #define MAXINITIALNODES 3
 #define NUMVAL_MEAN 0
 #define NUMVAL_STDDEV 0.5
+#define SEED 424242424242
 
 class RNG 
 {

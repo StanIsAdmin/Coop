@@ -2,6 +2,7 @@
 #define SIMULATION_H
 
 #include <array>
+#include <vector>
 #include <iostream>
 
 #include "NeuralNetwork.hpp"
@@ -20,46 +21,45 @@ class Simulation
 		///Randomness
 		static RNG rng; //random number generator
 		
-		///Strategy evaluation
-		Strategies strats;
-		
-		///Population
-		NeuralNetwork* population[POPULATION_SIZE]; //dynamically allocated NNs
-		unsigned long int population_payoff_sum[POPULATION_SIZE]; //sum of all game payoffs
-		unsigned long int population_game_count[POPULATION_SIZE]; //number of games played
-		unsigned long int total_defections = 0;
-		unsigned long int total_cooperations = 0;
-		std::array<double, POPULATION_SIZE> population_fitness;
-		unsigned int population_strategies[STRATEGIES_COUNT]; //closest pure strategies
-		
-		///Output
-		std::string pop_intelligence = "";
-		std::string pop_fitness = "";
-		std::string avg_cooperation = "";
-		std::array<std::string, STRATEGIES_COUNT> strategies_counts;
-		
-		//strategy names, in same order as defined in "Strategies.hpp"
-		const std::array<std::string, STRATEGIES_COUNT> strategies_names = {{"cooper", "defect", "tittat", "twotat", "pavlov"}}; 
-		
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 		
-		void resetGenerationCounters();
+		///Strategy evaluation
+		Strategies strats; //pure strategy evaluator
+		
+		///Neural Networks
+		NeuralNetwork* nn_population[POPULATION_SIZE]; //dynamically allocated NNs
+		
+		///NN counters
+		unsigned long int nn_game_counts[POPULATION_SIZE]; //number of games played
+		unsigned long int nn_payoff_sums[POPULATION_SIZE]; //sum of all game payoffs
+		unsigned long int total_defections; //number of defections
+		unsigned long int total_cooperations; //number of cooperations
+		
+		///Population history (output data)
+		std::vector<std::array<int, POPULATION_SIZE>> population_intelligence;
+		std::vector<std::array<double, POPULATION_SIZE>> population_fitness;
+		std::vector<std::array<long long int, 2>> cooperation_defection;
+		std::vector<std::array<int, STRATEGIES_COUNT>> strategies_count;
+		
+		///Game (re)initialization
+		void presetCounters(); //resets all neural network counters
+		
+		///Game development
 		void playGeneration(); //play all games for the entire generation
 		void playEachOther(int playerAIndex, int playerBIndex); //play a number of rounds between two players
 		
 		///Population assessment
-		void evaluatePopulationFitness();
-		void assessPopulation(); //assigns to each network its closest pure strategy
+		void assessPopulation(); //generates all required output data from population
 		
 		///Selection
 		void nextGeneration(); //replaces the current generation by the next one
 		
 		///Simulation output
-		void outputResults(unsigned int generations); //prints the simulation results
+		void outputResults(); //prints the simulation results
 	
 	public:
-		Simulation(const GamePayoffs& payoffs);
+		Simulation(const GamePayoffs& payoffs); //ctr
 		
 		void run(unsigned int generations); //run the simulation for n generations
 };
