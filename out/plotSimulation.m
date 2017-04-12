@@ -20,6 +20,8 @@ function plotSimulation(fileName)
   close
   
   #Cooperation
+  avg_cooperation = cooperation_defection(:,1) ./ (cooperation_defection(:,1).+cooperation_defection(:,2));
+  
   figure('visible','off');
   plot(avg_cooperation)
   title("Average cooperation frequency per generation")
@@ -45,6 +47,12 @@ function plotSimulation(fileName)
   close
   
   #Strategies
+  count_cooper = strategies_count(:,1);
+  count_defect = strategies_count(:,2);
+  count_tittat = strategies_count(:,3);
+  count_twotat = strategies_count(:,4);
+  count_pavlov = strategies_count(:,5);
+  
   figure('visible','off');
   area([count_defect (count_tittat + count_twotat) count_pavlov count_cooper])
   title("Repartiton of pure strategies per generation")
