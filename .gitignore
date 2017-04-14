@@ -1,7 +1,5 @@
 bin/
-
-*.jpg
-*.log
+out/
 
 # Compiled Object files
 *.slo
