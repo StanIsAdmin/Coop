@@ -31,7 +31,7 @@ void Simulation::run(unsigned int generations)
 	//reserve array capacity for output data (optimisation)
 	population_intelligence.reserve(generations);
 	population_fitness.reserve(generations);
-	cooperation_defection.reserve(generations);
+	cooperation_frequency.reserve(generations);
 	strategies_count.reserve(generations);
 	
 	//main loop of simulation
@@ -58,7 +58,7 @@ void Simulation::presetCounters()
 	//output data
 	population_intelligence.emplace_back();
 	population_fitness.emplace_back();
-	cooperation_defection.emplace_back();
+	cooperation_frequency.emplace_back();
 	strategies_count.emplace_back();
 }
 
@@ -122,7 +122,6 @@ void Simulation::assessPopulation()
 	std::array<int, POPULATION_SIZE>& current_intelligence = population_intelligence.back();
 	std::array<double, POPULATION_SIZE>& current_fitness = population_fitness.back();
 	std::array<int, STRATEGIES_COUNT>& current_strategies = strategies_count.back();
-	std::array<long long int, 2>& current_coop_defect = cooperation_defection.back();
 	
 	for (int i=0; i<POPULATION_SIZE; ++i) {
 		
@@ -137,8 +136,7 @@ void Simulation::assessPopulation()
 		current_strategies[strats.closestPureStrategy(*(nn_population[i]))] += 1;
 	}
 	//average cooperation frequency
-	current_coop_defect[0] = static_cast<long long int>(total_cooperations);
-	current_coop_defect[1] = static_cast<long long int>(total_defections);
+	cooperation_frequency.back()[0] = static_cast<double>(total_cooperations) / static_cast<double>(total_cooperations + total_defections);
 }
 
 /*Replaces the current generation by selection based on fitness followed by mutation*/
@@ -193,7 +191,7 @@ void Simulation::outputResults()
 	printMatrix<double, POPULATION_SIZE>(population_fitness, std::string("pop_fitness"));
 	
 	//Average cooperation
-	printMatrix<long long int, 2>(cooperation_defection, std::string("cooperation_defection"));
+	printMatrix<double, 1>(cooperation_frequency, std::string("cooperation_freq"));
 	
 	//Strategies
 	printMatrix<int, STRATEGIES_COUNT>(strategies_count, std::string("strategies_count"));

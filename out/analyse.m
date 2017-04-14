@@ -5,54 +5,53 @@ function analyse(filename_base, file_count)
   #GNUplot toolkit is better toolkit
   graphics_toolkit gnuplot
   
-  all_intelligence = [];
-  all_fitness = [];
-  all_cooperation_defection = [];
+  all_pop_intelligence = [];
+  all_pop_fitness = [];
+  all_cooperation_freq = [];
   all_strategies_count = [];
   
   #Load simulation data and append it to all-simulation data
   for file_index = 1:file_count
     load([file_name, int2str(file_index), file_extension]);
-    all_intelligence = [all_intelligence; pop_intelligence];
-    all_fitness = [all_fitness; pop_fitness];
-    all_cooperation_defection = [all_cooperation_defection; cooperation_defection];
+    all_pop_intelligence = [all_pop_intelligence; pop_intelligence];
+    all_pop_fitness = [all_pop_fitness; pop_fitness];
+    all_cooperation_freq = [all_cooperation_freq; cooperation_freq];
     all_strategies_count = [all_strategies_count; strategies_count];
     
     #Plot individual simulation
-    plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_defection, strategies_count);
+    plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
   end
   
-  plotAverages([file_name int2str(1) "-" int2str(file_count)], all_intelligence, all_fitness, all_cooperation_defection, all_strategies_count);
+  plotAverages([file_name int2str(1) "-" int2str(file_count)], all_pop_intelligence, all_pop_fitness, all_cooperation_freq, all_strategies_count);
 
 
 
-function plotAverages(file_name, intelligence, fitness, cooperation_defection, strategies_count)
+function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
   #Cooperation per mean intelligence
   intelligence_level_precision = 2;
   intelligence_level_max = 10
   intelligence_level_categories = intelligence_level_max*intelligence_level_precision + 1;
   
-  avg_cooperation = cooperation_defection(:,1) ./ (cooperation_defection(:,1) .+ cooperation_defection(:,2));
-  avg_intelligence = mean(intelligence, 2);
+  avg_intelligence = mean(pop_intelligence, 2);
   
-  level_sum_coop = zeros(1,intelligence_level_categories);
-  level_count_coop = zeros(1,intelligence_level_categories);
-  level_min_coop = zeros(1,intelligence_level_categories);
-  level_max_coop = zeros(1,intelligence_level_categories);
+  level_sum_coop = zeros(1, intelligence_level_categories);
+  level_count_coop = zeros(1, intelligence_level_categories);
+  level_min_coop = zeros(1, intelligence_level_categories);
+  level_max_coop = zeros(1, intelligence_level_categories);
   
-  for index = 1:size(avg_cooperation)(1)
+  for index = 1:size(cooperation_freq)(1)
     intelligence_level = round(avg_intelligence(index)*intelligence_level_precision) + 1;
-    cooperation_level = avg_cooperation(index);
+    cooperation_level = cooperation_freq(index);
     level_sum_coop(intelligence_level) += cooperation_level;
     level_count_coop(intelligence_level) += 1;
     level_min_coop(intelligence_level) = min([level_min_coop(intelligence_level) cooperation_level]);
     level_max_coop(intelligence_level) = max([level_max_coop(intelligence_level) cooperation_level]);
   end
   
-  level_x_axis = [0:1.0/intelligence_level_precision:intelligence_level_max]
-  level_avg_coop = level_sum_coop ./ level_count_coop
-  level_neg_coop = level_avg_coop .- level_min_coop
-  level_pos_coop = level_max_coop .- level_avg_coop
+  level_x_axis = [0:1.0/intelligence_level_precision:intelligence_level_max];
+  level_avg_coop = level_sum_coop ./ level_count_coop;
+  level_neg_coop = level_avg_coop .- level_min_coop;
+  level_pos_coop = level_max_coop .- level_avg_coop;
   
   figure('visible','off');
   errorbar(level_x_axis, level_avg_coop, level_neg_coop, level_pos_coop, 'o')
@@ -66,7 +65,7 @@ function plotAverages(file_name, intelligence, fitness, cooperation_defection, s
     
 
 
-function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_defection, strategies_count)
+function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
   #Intelligence per generation
   avg_intelligence = mean(pop_intelligence, 2); #average of rows (each row = one generation)
   
@@ -79,11 +78,9 @@ function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_de
   print([file_name, " Intelligence.png"], "-dpng", "-r600")
   close
   
-  #Cooperation per generation
-  avg_cooperation = cooperation_defection(:,1) ./ (cooperation_defection(:,1).+cooperation_defection(:,2));
-  
+  #Cooperation per generation  
   figure('visible','off');
-  plot(avg_cooperation)
+  plot(cooperation_freq)
   title("Average cooperation frequency per generation")
   xlabel("Simulation time (generations)")
   ylabel("Cooperation frequency")
@@ -126,5 +123,5 @@ function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_de
   close
   
   #Correlation between cooperation and intelligence
-  spearman_cooperation_intelligence = spearman(avg_intelligence, avg_cooperation)
+  spearman_cooperation_intelligence = spearman(avg_intelligence, cooperation_freq)
   

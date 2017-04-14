@@ -39,7 +39,7 @@ class Simulation
 		///Population history (output data)
 		std::vector<std::array<int, POPULATION_SIZE>> population_intelligence;
 		std::vector<std::array<double, POPULATION_SIZE>> population_fitness;
-		std::vector<std::array<long long int, 2>> cooperation_defection;
+		std::vector<std::array<double, 1>> cooperation_frequency;
 		std::vector<std::array<int, STRATEGIES_COUNT>> strategies_count;
 		
 		///Game (re)initialization
