@@ -7,13 +7,15 @@
 #include "Rng.hpp"
 #include "Payoffs.hpp"
 
-#define ASSESSMENT_COUNT 5
+/*Assessments are games against a virtual opponent*/
 #define ASSESSMENT_SIZE 20
+#define ASSESSMENT_COUNT 5
+#define ASSESSMENT_PREV_CHOICES 2
 #define ASSESSMENT_PROB_STEP 0.25
 
 /*List of pure strategies and their unique index*/
-#define STRATEGIES_ALWAYS_COOPERATE 0
-#define STRATEGIES_ALWAYS_DEFECT 1
+#define STRATEGIES_ALWAYS_DEFECT 0
+#define STRATEGIES_ALWAYS_COOPERATE 1
 #define STRATEGIES_TIT_FOR_TAT 2
 #define STRATEGIES_TIT_FOR_TWO_TATS 3
 #define STRATEGIES_PAVLOV_LIKE 4
@@ -40,7 +42,8 @@ class Strategies
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
 		///Choices sequences
-		bool opponent_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE]; //random choices used for assessment
+		//random choices used for assessment
+		bool opponent_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE + ASSESSMENT_PREV_CHOICES];
 		
 		///Pure strategies and player's average cooperation per assessment
 		std::array<std::array<double, ASSESSMENT_COUNT>, STRATEGIES_COUNT> strats_avg_coop;

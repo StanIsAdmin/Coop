@@ -1,35 +1,41 @@
-function analyse(filename_base, file_count)
+function analyse(file_base, file_count)
   #Filename details
-  [file_path, file_name, file_extension] = fileparts(filename_base);
+  [file_path, file_name, file_extension] = fileparts(file_base);
   
   #GNUplot toolkit is better toolkit
   graphics_toolkit gnuplot
   
+  #All-simulations data
   all_pop_intelligence = [];
   all_pop_fitness = [];
   all_cooperation_freq = [];
   all_strategies_count = [];
   
-  #Load simulation data and append it to all-simulation data
   for file_index = 1:file_count
+    #Load simulation data and
     load([file_name, int2str(file_index), file_extension]);
+    
+    #Pool together tit-for-tat and tit-for-two tats strategies
+    strategies_count = [strategies_count(:,1:2) (strategies_count(:,3) .+ strategies_count(:,4)) strategies_count(:,5)];
+    
+    #Append simulation data to all-simulations data
     all_pop_intelligence = [all_pop_intelligence; pop_intelligence];
     all_pop_fitness = [all_pop_fitness; pop_fitness];
     all_cooperation_freq = [all_cooperation_freq; cooperation_freq];
     all_strategies_count = [all_strategies_count; strategies_count];
     
     #Plot individual simulation
-    plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
+    #plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
   end
   
-  plotAverages([file_name int2str(1) "-" int2str(file_count)], all_pop_intelligence, all_pop_fitness, all_cooperation_freq, all_strategies_count);
-
+  plotAverages([file_name "0-" int2str(file_count)], all_pop_intelligence, all_pop_fitness, all_cooperation_freq, all_strategies_count);
+end
 
 
 function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
   #Cooperation per mean intelligence
+  intelligence_level_max = 20;
   intelligence_level_precision = 2;
-  intelligence_level_max = 10;
   intelligence_level_categories = intelligence_level_max*intelligence_level_precision + 1;
   
   avg_intelligence = mean(pop_intelligence, 2);
@@ -63,21 +69,6 @@ function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq
   close
   
   #Correlation between strategy frequency and selection for intelligence
-  count_cooper_all = strategies_count(:,1);
-  count_defect_all = strategies_count(:,2);
-  count_tittat_all = strategies_count(:,3) .+ strategies_count(:,4);
-  count_pavlov_all = strategies_count(:,5);
-  
-  count_cooper_low = [];
-  count_defect_low = [];
-  count_tittat_low = [];
-  count_pavlov_low = [];
-  
-  count_cooper_high = [];
-  count_defect_high = [];
-  count_tittat_high = [];
-  count_pavlov_high = [];
-  
   generations = size(pop_intelligence)(1);
   avg_fitness = mean(pop_fitness, 2);
   
@@ -85,57 +76,46 @@ function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq
   selection_for_intelligence_low = [];
   selection_for_intelligence_high = [];
   
+  strategies_count_all = strategies_count;
+  strategies_count_low = [];
+  strategies_count_high = [];
+  
   for row_index = 1:generations
     selection_for_intelligence_all(row_index) = cov(pop_intelligence(row_index,:), pop_fitness(row_index,:)) / avg_fitness(row_index);
     
     if (cooperation_freq(row_index) < 0.5)
-      selection_for_intelligence_low = [selection_for_intelligence_low; selection_for_intelligence_all(row_index)];
-      count_cooper_low = [count_cooper_low; count_cooper_all(row_index)];
-      count_defect_low = [count_defect_low; count_defect_all(row_index)];
-      count_tittat_low = [count_tittat_low; count_tittat_all(row_index)];
-      count_pavlov_low = [count_pavlov_low; count_pavlov_all(row_index)];
+      selection_for_intelligence_low = [selection_for_intelligence_low; selection_for_intelligence_all(row_index, :)];
+      strategies_count_low = [strategies_count_low ; strategies_count_all(row_index, :)];
     else 
-      selection_for_intelligence_high = [selection_for_intelligence_high; selection_for_intelligence_all(row_index)];
-      count_cooper_high = [count_cooper_high; count_cooper_all(row_index)];
-      count_defect_high = [count_defect_high; count_defect_all(row_index)];
-      count_tittat_high = [count_tittat_high; count_tittat_all(row_index)];
-      count_pavlov_high = [count_pavlov_high; count_pavlov_all(row_index)];
+      selection_for_intelligence_high = [selection_for_intelligence_high; selection_for_intelligence_all(row_index, :)];
+      strategies_count_high = [strategies_count_high ; strategies_count_all(row_index, :)];
     end 
   end
   
   spearman_selection_strategies = zeros(3, 4);
-  spearman_selection_strategies(1,1) = spearman(count_defect_all, selection_for_intelligence_all);
-  spearman_selection_strategies(1,2) = spearman(count_cooper_all, selection_for_intelligence_all);
-  spearman_selection_strategies(1,3) = spearman(count_tittat_all, selection_for_intelligence_all);
-  spearman_selection_strategies(1,4) = spearman(count_pavlov_all, selection_for_intelligence_all);
-  
-  spearman_selection_strategies(2,1) = spearman(count_defect_low, selection_for_intelligence_low);
-  spearman_selection_strategies(2,2) = spearman(count_cooper_low, selection_for_intelligence_low);
-  spearman_selection_strategies(2,3) = spearman(count_tittat_low, selection_for_intelligence_low);
-  spearman_selection_strategies(2,4) = spearman(count_pavlov_low, selection_for_intelligence_low);
-  
-  spearman_selection_strategies(3,1) = spearman(count_defect_high, selection_for_intelligence_high);
-  spearman_selection_strategies(3,2) = spearman(count_cooper_high, selection_for_intelligence_high);
-  spearman_selection_strategies(3,3) = spearman(count_tittat_high, selection_for_intelligence_high);
-  spearman_selection_strategies(3,4) = spearman(count_pavlov_high, selection_for_intelligence_high);
+  for strategy_index = 1:4
+    spearman_selection_strategies(1, strategy_index) = spearman(strategies_count_all(:, strategy_index), selection_for_intelligence_all);
+    spearman_selection_strategies(2, strategy_index) = spearman(strategies_count_low(:, strategy_index), selection_for_intelligence_low);
+    spearman_selection_strategies(3, strategy_index) = spearman(strategies_count_high(:, strategy_index), selection_for_intelligence_high);
+  end
   
   figure('visible','off');
-  series_names = {"all data", "coop < 0.5", "coop >= 0.5"};
   h = bar(spearman_selection_strategies);
   set(h(1), "facecolor", "k")
   set(h(2), "facecolor", "w")
   set(h(3), "facecolor", [.60 .60 .60])
   set(h(4), "facecolor", [.83 .83 .83])
+  series_names = {"all data", "coop < 0.5", "coop ≥ 0.5"};
+  set(gca,'xticklabel', series_names)
   title("Spearman rank correlation between strategies and selection for intelligence")
   ylabel("Spearman rank correlation")
   xlabel("Strategies")
-  set(gca,'xticklabel', series_names)
-  #axis("ticy", "labely")
   print([file_name, " Strategies and Selection.png"], "-dpng", "-r600")
   close
     
   #Correlation between cooperation and intelligence
   spearman_cooperation_intelligence = spearman(avg_intelligence, cooperation_freq)
+end
 
 
 function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
@@ -177,15 +157,9 @@ function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_fr
   print([file_name, " Selection.png"], "-dpng", "-r600")
   close
   
-  #Strategies per generation
-  count_cooper = strategies_count(:,1);
-  count_defect = strategies_count(:,2);
-  count_tittat = strategies_count(:,3);
-  count_twotat = strategies_count(:,4);
-  count_pavlov = strategies_count(:,5);
-  
+  #Strategies per generation  
   figure('visible','off');
-  h = area([count_defect count_cooper (count_tittat + count_twotat) count_pavlov]);
+  h = area(strategies_count);
   title("Repartiton of pure strategies per generation")
   xlabel("Simulation time (generations)")
   ylabel("Strategies amongst the population")
@@ -193,8 +167,7 @@ function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_fr
   set(h(2), "facecolor", "w")
   set(h(3), "facecolor", [.60 .60 .60])
   set(h(4), "facecolor", [.83 .83 .83])
-  #legend("Defect", "Cooperate", "Tit for tat", "Pavlov", "location", "southoutside", "orientation", "horizontal")
-  #legend boxoff
   xlim([1 inf])
   print([file_name, " Strategies.png"], "-dpng", "-r600")
   close
+end

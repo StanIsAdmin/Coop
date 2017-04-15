@@ -181,6 +181,15 @@ void printMatrix(const std::vector<std::array<T, N>>& matrix, std::string variab
 	std::cout << output;
 }
 
+void printScalar(int value, std::string variable_name)
+{
+	std::string output = "";
+	output += "# name: " + variable_name + "\n";
+	output += "# type: scalar\n";
+	output += std::to_string(value) + "\n\n";
+	std::cout << output;
+}
+
 /*Writes the simulation's results to the standard output*/
 void Simulation::outputResults()
 {
@@ -194,5 +203,6 @@ void Simulation::outputResults()
 	printMatrix<double, 1>(cooperation_frequency, std::string("cooperation_freq"));
 	
 	//Strategies
+	std::cout << "# STRATEGIES are [always defect, always cooperate, tit for tat, tit for two tats, pavlov-like]\n";
 	printMatrix<int, STRATEGIES_COUNT>(strategies_count, std::string("strategies_count"));
 }
