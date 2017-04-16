@@ -47,8 +47,6 @@ class RNG
 		
 		static double getRandomNumval();
 		
-		static double getRandomProbability();
-		
 		static bool getTrueWithProbability(double trueProbability);
 		
 		static int getRandomInt(int rangeStart, int rangeStop);

@@ -6,7 +6,7 @@
 /* Computes the sigmoidal squash of -value -threshold (maps values from [-inf, inf] to [0, 1]) */
 numval sigmoidalSquash(numval value, numval threshold)
 {
-	return 1/(1+std::exp(-value-threshold));
+	return 1 / (1 + std::exp(-value -threshold));
 }
 
 
@@ -29,6 +29,7 @@ void InnerNode::addContextNode(numval value, numval link_weight)
 	has_context_node = true;
 	context_value = value;
 	context_link_weight = link_weight;
+	assert(hasContextNode());
 }
 
 /*Removes the context node from the cognitive node*/
@@ -38,12 +39,14 @@ void InnerNode::removeContextNode()
 	has_context_node = false;
 	context_value = 0;
 	context_link_weight = 0;
+	assert(not hasContextNode());
 }
 
 /*Returns the node output given the provided input*/
 numval InnerNode::operator()(numval input)
 {
 	assert(not std::isnan(input)); //verify numval is a regular numeric value
+	
 	if (has_context_node) {
 		input += context_value * context_link_weight; //add weighted context to input
 		input = sigmoidalSquash(input, threshold_value);
@@ -52,11 +55,13 @@ numval InnerNode::operator()(numval input)
 	else {
 		input = sigmoidalSquash(input, threshold_value);
 	}
+	
 	assert(input >= 0 and input <= 1); //verify the squashing function worked
 	
 	return input;
 }
 
+/*True if both inner nodes have the same context node value, context link weight and threshold value*/
 bool InnerNode::operator==(const InnerNode& in)
 {
 	return has_context_node == in.has_context_node
@@ -241,40 +246,40 @@ void NeuralNetwork::removeCognitiveNode()
 
 void NeuralNetwork::mutate()
 {
-	///Modify numeric values
+	///Numeric values mutations
 	for (int i=0; i<cognitive_node_count; i++) {
 		///Link weights
 		//From self payoff to inner nodes
-		if (rng.getRandomProbability() < value_mutation_prob) {
+		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			link_weights_from_self_payoff[i] += rng.getRandomNumval();
 		}
 		//From other payoff to inner nodes
-		if (rng.getRandomProbability() < value_mutation_prob) {
+		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			link_weights_from_other_payoff[i] += rng.getRandomNumval();
 		}
 		//From inner nodes to output
-		if (rng.getRandomProbability() < value_mutation_prob) {
+		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			link_weights_from_inner_nodes[i] += rng.getRandomNumval();
 		}
 		//From context nodes to cognitive nodes
-		if (rng.getRandomProbability() < value_mutation_prob) {
+		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			inner_nodes[i]->context_link_weight += rng.getRandomNumval();
 		}
 		
 		///Node thresholds
 		//Cognitive nodes
-		if (rng.getRandomProbability() < value_mutation_prob) {
+		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			inner_nodes[i]->threshold_value += rng.getRandomNumval();
 		}
 	}
 	
 	//Output node threshold
-	if (rng.getRandomProbability() < value_mutation_prob) {
+	if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 		output_node_threshold += rng.getRandomNumval();
 	}
 	
-	///Network structure
-	if (rng.getRandomProbability() < network_mutation_prob) {
+	///Network structure mutations
+	if (rng.getTrueWithProbability(NETWORK_STRUCTURE_MUTATION_PROB)) {
 		if (rng.getRandomBool()) addNode();
 		else removeNode();
 	}
@@ -310,7 +315,7 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 	numval cooperate_prob = sigmoidalSquash(output, output_node_threshold);
 	
 	//If random prob < cooperate prob : cooperate
-	return rng.getRandomProbability() < cooperate_prob;
+	return rng.getTrueWithProbability(cooperate_prob);
 }
 
 /*Returns true if it chooses to cooperate by default, false otherwise*/

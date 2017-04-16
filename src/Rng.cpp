@@ -57,10 +57,6 @@ double RNG::getRandomNumval() {
 	return distribution_real_values(generator);
 }
 
-double RNG::getRandomProbability() {
-	return distribution_prob_values(generator);
-}
-
 bool RNG::getTrueWithProbability(double trueProbability) {
 	return trueProbability > distribution_prob_values(generator);
 }

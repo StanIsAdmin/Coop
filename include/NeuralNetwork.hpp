@@ -12,6 +12,8 @@
 #include "Payoffs.hpp"
 
 #define MAXNODES 10
+#define NETWORK_VALUE_MUTATION_PROB 0.1
+#define NETWORK_STRUCTURE_MUTATION_PROB 0.02
 
 typedef double numval;
 
@@ -53,10 +55,6 @@ class NeuralNetwork
 	private:
 		///Randomness
 		static RNG rng; //random number generator
-		
-		///Probabilities
-		static constexpr numval value_mutation_prob = 0.02;
-		static constexpr numval network_mutation_prob = 0.01;
 	
 		///Neural network structure
 		bool cooperate_by_default; //used for decision-making in first round
