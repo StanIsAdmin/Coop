@@ -1,4 +1,5 @@
 #include "Rng.hpp"
+#include "RngTest.hpp"
 #include "NeuralNetwork.hpp"
 #include "NeuralNetworkTest.hpp"
 #include "Simulation.hpp"
@@ -7,7 +8,7 @@
 #include <cstring>
 #include <ctime>
 
-void runTests();
+void runTests(int test_rounds);
 void runSimulation(int sim_rounds, std::string game_type);
 
 int main(int argc, char** argv)
@@ -16,8 +17,8 @@ int main(int argc, char** argv)
 		std::cerr << "Error: no args provided" << std::endl;
 		return 1;
 	}
-	else if (std::string(argv[1]) == "test" and argc == 2) {
-		runTests();
+	else if (std::string(argv[1]) == "test" and argc == 3) {
+		runTests(atoi(argv[2]));
 	}
 	else if (std::string(argv[1]) == "run" and argc == 4) {
 		runSimulation(atoi(argv[2]), std::string(argv[3]));		
@@ -30,9 +31,14 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void runTests()
+void runTests(int test_rounds)
 {
-	testNeuralNetwork();
+	for (int round=0; round<test_rounds; ++round) {
+		testRng();
+		testNeuralNetwork();
+	}
+	
+	std::cout << "All tests passed!" << std::endl;
 }
 
 void runSimulation(int sim_rounds, std::string game_type)

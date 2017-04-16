@@ -1,24 +1,42 @@
 #include "NeuralNetworkTest.hpp"
 
+
+void testInnerNodes();
+void testNetwork();
+
 void testNeuralNetwork()
 {
-	std::cout << "Running tests..." << std::endl;
+	std::cout << "Testing NeuralNetwork...";
+	
+	testInnerNodes();
+	testNetwork();
+	
+	std::cout << " done!" << std::endl;
+}	
+	
+void testInnerNodes()
+{
+	RNG rng = RNG();
 	
 	///InnerNode class construction
-	InnerNode node(0.0);
-	assert(node(0.0) == 0.5);
+	numval input = rng.getRandomNumval();
+	numval threshold = rng.getRandomNumval();
+	InnerNode node(threshold);
+	assert(node(input) == sigmoidalSquash(input, threshold));
+	
+	///InnerNode context addition
+	numval context_value = rng.getRandomNumval();
+	numval link_weight = rng.getRandomNumval();
+	node.addContextNode(context_value, link_weight);
+	assert(node(input) == sigmoidalSquash(input + (context_value * link_weight), threshold));
 	
 	///InnerNode copy
 	InnerNode node2(node);
-	assert(node2(0.0) == 0.5);
-	
-	///InnerNode context addition
-	node.addContextNode(1.0, -3.0);
-	assert(node(3.0) == 0.5);
+	assert(node2(input) == node(input));
 	
 	///InnerNode context removal
 	node.removeContextNode();
-	assert(node(0.0) == 0.5);
+	assert(node(input) == sigmoidalSquash(input, threshold));
 	
 	///InnerNode squashing function
 	numval max = std::numeric_limits<numval>::max();
@@ -34,7 +52,10 @@ void testNeuralNetwork()
 	node3.addContextNode(min, low);
 	result = node3(max);
 	assert(result >= 0 and  result <= 1);
-	
+}
+
+void testNetwork()
+{
 	///Construction & initial nodes
 	NeuralNetwork nn;
 	int cogNodes = nn.getCognitiveNodeCount();
@@ -58,6 +79,14 @@ void testNeuralNetwork()
 	///Copy constructor
 	NeuralNetwork nn2(nn);
 	assert(nn == nn2);
+	payoff input_self(7), input_other(6);
+	int nn_cooperations(0), nn2_cooperations(0);
+	
+	for (int i=0; i<100; ++i) {
+		if (nn(input_self, input_other)) nn_cooperations ++;
+		if (nn2(input_self, input_other)) nn2_cooperations ++;
+	}
+	assert(abs(nn2_cooperations - nn_cooperations) < 55); //prob. of different results is weak
 	
 	///Node removal
 	innNodes = MAXNODES*2;
@@ -81,6 +110,14 @@ void testNeuralNetwork()
 	}
 	assert(nn3 != nn2);
 	
+	int structure_mutations_count = 0, inner_node_count;
+	for (int i=0; i<100; ++i) {
+		inner_node_count = nn2.getInnerNodeCount();
+		nn2.mutate();
+		if (nn2.getInnerNodeCount() != inner_node_count) structure_mutations_count++;
+	}
+	assert(structure_mutations_count < 10);
+	
 	///Randomness of cooperate/defect
 	int defaultCollab = 0;
 	int otherCollab = 0;
@@ -95,6 +132,4 @@ void testNeuralNetwork()
 	//There's one chance in a million that 1000 coin tosses result in 575 or more heads/tails
 	assert(defaultCollab < 575); 
 	assert(otherCollab < 575);
-	
-	std::cout << "All tests passed!" << std::endl;
 }
