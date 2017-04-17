@@ -8,8 +8,13 @@
 #include <cstring>
 #include <ctime>
 
-void runTests(int test_rounds);
-void runSimulation(int sim_rounds, std::string game_type);
+void runTests(unsigned test_rounds);
+void runSimulation(unsigned sim_rounds, std::string game_type);
+
+unsigned strtou(const char* unsigned_str) {
+	char* end;
+	return static_cast<unsigned>(strtoul(unsigned_str, &end, 10));
+}
 
 int main(int argc, char** argv)
 {
@@ -19,20 +24,19 @@ int main(int argc, char** argv)
 		return 1;
 	}
 	//test application
-	else if (std::string(argv[1]) == "test" and argc == 3) {
-		runTests(atoi(argv[2]));
+	else if (std::string(argv[1]) == "test" and argc <= 3) {
+		//number of test rounds
+		unsigned test_rounds = (argc == 3) ? strtou(argv[2]) : 1;
+		
+		runTests(test_rounds);
 	}
 	//run application
 	else if (std::string(argv[1]) == "run" and argc <= 5) {
 		//set the RNG seed from argument if provided
-		if (argc == 5) {
-			unsigned seed;
-			sscanf(argv[4], "%u", &seed); //parse arg as unsigned
-			RNG::setSeed(seed);
-		}
+		if (argc == 5) RNG::setSeed(strtou(argv[4]));
 		
 		//run the simulation
-		runSimulation(atoi(argv[2]), std::string(argv[3]));		
+		runSimulation(strtou(argv[2]), std::string(argv[3]));		
 	}
 	//unknown arguments
 	else {
@@ -43,11 +47,12 @@ int main(int argc, char** argv)
 	return 0;
 }
 
-void runTests(int test_rounds)
+void runTests(unsigned test_rounds)
 {
-	std::cout << "Running tests..." << std::endl;
+	std::cout << "Running tests... (" << test_rounds << " rounds)" << std::endl;
 	
-	for (int round=0; round<test_rounds; ++round) {
+	for (unsigned round=0; round<test_rounds; ++round) {
+		std::cout << "- round " << round+1 << "/" << test_rounds << std::endl;
 		testRng();
 		testNeuralNetwork();
 	}
@@ -55,7 +60,7 @@ void runTests(int test_rounds)
 	std::cout << "All tests passed!" << std::endl;
 }
 
-void runSimulation(int sim_rounds, std::string game_type)
+void runSimulation(unsigned sim_rounds, std::string game_type)
 {	
 	GamePayoffs sim_payoffs{};
 	
