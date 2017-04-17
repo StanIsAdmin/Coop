@@ -18,20 +18,20 @@ class RNG
 		static bool seed_is_random;
 		static std::mt19937_64 generator;
 		
-		//number of game iterations between two players (pascal distribution with prob. ROUND_ITERATIONS_MEAN_PROB, stops after ROUND_ITERATIONS_STOP_COUNT)
-		static std::negative_binomial_distribution<int> distribution_iterations;
-		
-		//used for different binary choices (True or False)
+		//random boolean
 		static std::uniform_int_distribution<int> distribution_bool;
 		
-		//number of initial nodes (uniform distribution between 0 and MAXINITIALNODES)
+		//random probability
+		static std::uniform_real_distribution<double> distribution_probabilities;
+		
+		//random real value
+		static std::normal_distribution<double> distribution_numvals; 
+		
+		//random number of initial nodes
 		static std::uniform_int_distribution<int> distribution_initial_nodes;
 		
-		//random real value (normal distribution with mean NUMVAL_MEAN, std deviation NUMVAL_STDDEV
-		static std::normal_distribution<double> distribution_real_values; 
-		
-		//random probability (uniform distribution between 0 and 1)
-		static std::uniform_real_distribution<double> distribution_prob_values;
+		//random number of game iterations between two players
+		static std::negative_binomial_distribution<int> distribution_iterations;
 
 	public:
 		static void setSeed(unsigned new_seed);
@@ -41,18 +41,18 @@ class RNG
 		static long long int getSeed();
 		
 		static bool seedIsRandom();
-	
-		static int getIterationCount();
 		
 		static bool getRandomBool();
-		
-		static int getInitialNodeCount();
-		
-		static double getRandomNumval();
 		
 		static bool getTrueWithProbability(double trueProbability);
 		
 		static int getRandomInt(int rangeStart, int rangeStop);
+		
+		static double getRandomNumval();
+		
+		static int getInitialNodeCount();
+		
+		static int getIterationCount();
 		
 		//selects random individuals from population based on their fitness
 		template<std::size_t SIZE>
