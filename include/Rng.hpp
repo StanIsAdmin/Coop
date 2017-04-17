@@ -14,9 +14,8 @@
 class RNG 
 {
 	private:
-		static long long int seed;
+		static unsigned seed;
 		static bool seed_is_random;
-		
 		static std::mt19937_64 generator;
 		
 		//number of game iterations between two players (pascal distribution with prob. ROUND_ITERATIONS_MEAN_PROB, stops after ROUND_ITERATIONS_STOP_COUNT)
@@ -35,6 +34,10 @@ class RNG
 		static std::uniform_real_distribution<double> distribution_prob_values;
 
 	public:
+		static void setSeed(unsigned new_seed);
+		
+		static void setRandomSeed();
+	
 		static long long int getSeed();
 		
 		static bool seedIsRandom();

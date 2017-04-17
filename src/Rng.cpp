@@ -2,13 +2,8 @@
 
 
 /*Static members*/
-#ifndef SEED
-long long int RNG::seed = std::random_device()();
+unsigned RNG::seed = std::random_device()();
 bool RNG::seed_is_random = true;
-#else
-long long int RNG::seed = SEED;
-bool RNG::seed_is_random = false;
-#endif
 std::mt19937_64 RNG::generator = std::mt19937_64(seed);
 
 //Game iterations
@@ -26,6 +21,13 @@ std::normal_distribution<double> RNG::distribution_real_values = std::normal_dis
 //Probabilities (0 is included, 1 is not)
 std::uniform_real_distribution<double> RNG::distribution_prob_values = std::uniform_real_distribution<double>(0, 1);
 
+/*If called at all, this function should be called before any of the following functions.*/
+void RNG::setSeed(unsigned new_seed) {
+	seed = new_seed;
+	seed_is_random = false;
+	generator.seed(seed);
+}
+
 long long int RNG::getSeed() {
 	return seed;
 }
@@ -36,11 +38,7 @@ bool RNG::seedIsRandom() {
 
 int RNG::getIterationCount() {
 	int iterations = 1;
-	double continueProb = 1 - distribution_iterations(generator);
-	while (continueProb) {
-		iterations++;
-		continueProb = 1 - distribution_iterations(generator);
-	}
+	while (distribution_iterations(generator) == 0) ++iterations;
 	
 	return iterations;
 }

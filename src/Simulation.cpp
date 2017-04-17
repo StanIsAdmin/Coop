@@ -21,13 +21,6 @@ Simulation::Simulation(const GamePayoffs& payoffs):
 /*Executes one complete simulation with a certain number of generations*/
 void Simulation::run(unsigned int generations)
 {
-	//output the RNG seed and its randomness for future reference
-	std::cout << "# RNG seed: " << rng.getSeed();
-	if (rng.seedIsRandom())
-		std::cout << " (random)" << std::endl << std::endl;
-	else
-		std::cout << " (provided)" << std::endl << std::endl;
-	
 	//reserve array capacity for output data (optimisation)
 	population_intelligence.reserve(generations);
 	population_fitness.reserve(generations);
