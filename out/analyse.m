@@ -10,6 +10,7 @@ function analyse(file_base, file_count)
   all_pop_fitness = [];
   all_cooperation_freq = [];
   all_strategies_count = [];
+  all_selection_for_intelligence = [];
   
   for file_index = 1:file_count
     #Load simulation data and
@@ -25,15 +26,30 @@ function analyse(file_base, file_count)
     all_strategies_count = [all_strategies_count; strategies_count];
     
     #Plot individual simulation
-    #plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
+    selection_for_intelligence = plotSimulation([file_name, int2str(file_index)], pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
+    all_selection_for_intelligence = [all_selection_for_intelligence; selection_for_intelligence];
   end
   
-  plotAverages([file_name "0-" int2str(file_count)], all_pop_intelligence, all_pop_fitness, all_cooperation_freq, all_strategies_count);
+  plotAverages([file_name "0-" int2str(file_count)], all_pop_intelligence, all_pop_fitness, all_cooperation_freq, all_strategies_count, all_selection_for_intelligence);
 end
 
 
-function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
+function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count, selection_for_intelligence)
   #Cooperation per mean intelligence
+  plotCooperationByIntelligence(file_name, pop_intelligence, cooperation_freq);
+  
+  #Correlation between strategy frequency and selection for intelligence
+  plotStrategiesSelection(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count);
+  
+  #Selection for intelligence and transitions to cooperation
+  plotTransitionsToCooperation(file_name, cooperation_freq, selection_for_intelligence);
+  
+  #Correlation between cooperation and intelligence
+  #spearman_cooperation_intelligence = spearman(avg_intelligence, cooperation_freq)
+end
+
+
+function plotCooperationByIntelligence(file_name, pop_intelligence, cooperation_freq)
   intelligence_level_max = 20;
   intelligence_level_precision = 2;
   intelligence_level_categories = intelligence_level_max*intelligence_level_precision + 1;
@@ -67,10 +83,13 @@ function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq
   xlim([0 intelligence_level_max])
   print([file_name, " Cooperation per Intelligence.png"], "-dpng", "-r600")
   close
-  
-  #Correlation between strategy frequency and selection for intelligence
+end
+
+
+function plotStrategiesSelection(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
   generations = size(pop_intelligence)(1);
   avg_fitness = mean(pop_fitness, 2);
+  avg_intelligence = mean(pop_intelligence, 2);
   
   selection_for_intelligence_all = zeros(generations,1);
   selection_for_intelligence_low = [];
@@ -95,8 +114,17 @@ function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq
   spearman_selection_strategies = zeros(3, 4);
   for strategy_index = 1:4
     spearman_selection_strategies(1, strategy_index) = spearman(strategies_count_all(:, strategy_index), selection_for_intelligence_all);
-    spearman_selection_strategies(2, strategy_index) = spearman(strategies_count_low(:, strategy_index), selection_for_intelligence_low);
-    spearman_selection_strategies(3, strategy_index) = spearman(strategies_count_high(:, strategy_index), selection_for_intelligence_high);
+    try 
+      spearman_selection_strategies(2, strategy_index) = spearman(strategies_count_low(:, strategy_index), selection_for_intelligence_low);
+    catch
+      spearman_selection_strategies(2, strategy_index) = 0;
+    end
+    try 
+      spearman_selection_strategies(3, strategy_index) = spearman(strategies_count_high(:, strategy_index), selection_for_intelligence_high);
+    catch exception
+      spearman_selection_strategies(3, strategy_index) = 0;
+    end
+      
   end
   
   figure('visible','off');
@@ -105,20 +133,52 @@ function plotAverages(file_name, pop_intelligence, pop_fitness, cooperation_freq
   set(h(2), "facecolor", "w")
   set(h(3), "facecolor", [.60 .60 .60])
   set(h(4), "facecolor", [.83 .83 .83])
-  series_names = {"all data", "coop < 0.5", "coop ≥ 0.5"};
+  series_names = {"all data", "coop < 0.5", "coop >= 0.5"};
   set(gca,'xticklabel', series_names)
   title("Spearman rank correlation between strategies and selection for intelligence")
   ylabel("Spearman rank correlation")
   xlabel("Strategies")
   print([file_name, " Strategies and Selection.png"], "-dpng", "-r600")
   close
-    
-  #Correlation between cooperation and intelligence
-  spearman_cooperation_intelligence = spearman(avg_intelligence, cooperation_freq)
 end
 
 
-function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
+function plotTransitionsToCooperation(file_name, cooperation_freq, selection_for_intelligence)
+  generations = size(cooperation_freq)(1);
+  cooperation_average = cooperation_freq(2:generations, :);
+  cooperation_change = cooperation_average .- cooperation_freq(1:generations-1,:);
+
+  coop_avg_min = min(cooperation_average);
+  coop_avg_max = max(cooperation_average);
+  coop_avg_diff = coop_avg_max - coop_avg_min;
+  coop_change_min = min(cooperation_change);
+  coop_change_max = max(cooperation_change);
+  coop_change_diff = coop_change_max - coop_change_min;
+    
+  precision = 100;
+  Z = zeros(precision, precision);
+  X = coop_avg_min:(coop_avg_diff/100):coop_avg_max;
+  Y = coop_change_min:(coop_change_diff/100):coop_change_max;
+  for index = 1:generations-1
+    coop_avg_current = cooperation_average(index);
+    x_current = round(((coop_avg_current - coop_avg_min) / coop_avg_diff) * precision);
+    coop_change_current = cooperation_change(index);
+    y_current = round(((coop_change_current - coop_change_min) / coop_change_diff) * precision);
+    Z(y_current+1, x_current+1) = selection_for_intelligence(index+1);
+  end
+  
+  figure('visible','off');
+  colormap gray
+  contourf(X,Y,Z)
+  title("Selection for intelligence and transitions to cooperation")
+  xlabel("Cooperation frequency")
+  ylabel("Change in cooperation")
+  print([file_name, " Transitions to Cooperation.png"], "-dpng", "-r600")
+  close
+end
+
+
+function selection_for_intelligence = plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_freq, strategies_count)
   #Intelligence per generation
   avg_intelligence = mean(pop_intelligence, 2); #average of rows (each row = one generation)
   
@@ -170,4 +230,5 @@ function plotSimulation(file_name, pop_intelligence, pop_fitness, cooperation_fr
   xlim([1 inf])
   print([file_name, " Strategies.png"], "-dpng", "-r600")
   close
+
 end
