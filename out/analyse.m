@@ -156,7 +156,8 @@ function plotTransitionsToCooperation(file_name, cooperation_freq, selection_for
   coop_change_diff = coop_change_max - coop_change_min;
     
   precision = 100;
-  Z = zeros(precision, precision);
+  Z = zeros(precision+1, precision+1);
+  Z_counts = zeros(precision+1, precision+1);
   X = coop_avg_min:(coop_avg_diff/100):coop_avg_max;
   Y = coop_change_min:(coop_change_diff/100):coop_change_max;
   for index = 1:generations-1
@@ -164,7 +165,8 @@ function plotTransitionsToCooperation(file_name, cooperation_freq, selection_for
     x_current = round(((coop_avg_current - coop_avg_min) / coop_avg_diff) * precision);
     coop_change_current = cooperation_change(index);
     y_current = round(((coop_change_current - coop_change_min) / coop_change_diff) * precision);
-    Z(y_current+1, x_current+1) = selection_for_intelligence(index+1);
+    Z(y_current+1, x_current+1) = (selection_for_intelligence(index+1) + (Z(y_current+1, x_current+1) * Z_counts(y_current+1, x_current+1))) / (Z_counts(y_current+1, x_current+1) + 1);
+    Z_counts(y_current+1, x_current+1) += 1;
   end
   
   figure('visible','off');
