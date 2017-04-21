@@ -1,15 +1,12 @@
 #include "Strategies.hpp"
 
 
-/*Static members*/
-RNG Strategies::rng = RNG();
-
+/*Constructor*/
 Strategies::Strategies(const GamePayoffs& payoffs) :
 	game_payoffs(payoffs)
 {
 	initStrategies();
 }
-
 
 /*
 Initializes the average cooperation per assessment that correspond to each pure strategy.
@@ -28,13 +25,13 @@ void Strategies::initStrategies()
 		
 		//Initialize previous choices for virtual opponent
 		for (int prev_choice_index=0; prev_choice_index<ASSESSMENT_PREV_CHOICES; ++prev_choice_index) {
-			opponent_choices[assessment_index][prev_choice_index] = rng.getTrueWithProbability(coop_prob);
+			opponent_choices[assessment_index][prev_choice_index] = RNG::getTrueWithProbability(coop_prob);
 		}
-		prev_pavlov_choice = rng.getTrueWithProbability(coop_prob); //Init previous choice for pavlov strategy
+		prev_pavlov_choice = RNG::getTrueWithProbability(coop_prob); //Init previous choice for pavlov strategy
 		
 		for (int iteration=ASSESSMENT_PREV_CHOICES; iteration<ASSESSMENT_SIZE + ASSESSMENT_PREV_CHOICES; ++iteration) {
 			//The "virtual opponent" used to assess the network chooses to cooperate randomly with probability coop_prob
-			opponent_choices[assessment_index][iteration] = rng.getTrueWithProbability(coop_prob);
+			opponent_choices[assessment_index][iteration] = RNG::getTrueWithProbability(coop_prob);
 			
 			//Always cooperate/defect strategies do not depend on the "virtual opponent"'s choice
 			strats_avg_coop[STRATEGIES_ALWAYS_COOPERATE][assessment_index] += 1;

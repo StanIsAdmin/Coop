@@ -73,16 +73,13 @@ bool InnerNode::operator==(const InnerNode& in)
 
 /**---------- NeuralNetwork ----------**/
 
-/*Static members*/
-RNG NeuralNetwork::rng = RNG();
-
 /*Default constructor*/
 NeuralNetwork::NeuralNetwork():
-	cooperate_by_default(rng.getRandomBool()), //random bool
-	output_node_threshold(rng.getRandomNumval()) //random real value
+	cooperate_by_default(RNG::getRandomBool()), //random bool
+	output_node_threshold(RNG::getRandomNumval()) //random real value
 {	
 	//Choose number of initial nodes
-	int initial_nodes = rng.getInitialNodeCount();
+	int initial_nodes = RNG::getInitialNodeCount();
 	for (int i=0; i<initial_nodes; ++i) {
 		addNode();
 	}
@@ -130,7 +127,7 @@ int NeuralNetwork::getRandomCognitiveNode(bool withContext)
 		assert(cognitive_node_count - context_node_count == static_cast<int>(nodeSelection.size()));
 	
 	//Choose random cognitive node from the context-free list
-	unsigned int chosen_context_node = nodeSelection[rng.getRandomInt(0, static_cast<int>(nodeSelection.size())-1)];
+	unsigned int chosen_context_node = nodeSelection[RNG::getRandomInt(0, static_cast<int>(nodeSelection.size())-1)];
 	
 	assert(inner_nodes[chosen_context_node]->hasContextNode() == withContext);
 	
@@ -151,7 +148,7 @@ void NeuralNetwork::addNode()
 	else if (context_node_count == cognitive_node_count)	//Can't add context node
 		isContextNode = false;
 	else 													//Can add either, choose randomly
-		isContextNode = rng.getRandomBool();
+		isContextNode = RNG::getRandomBool();
 	
 	if (isContextNode) addContextNode();
 	else addCognitiveNode();
@@ -167,8 +164,8 @@ void NeuralNetwork::addContextNode()
 	unsigned int chosen_context_node = getRandomCognitiveNode(false);
 	
 	//Add context node to one cognitive node (random context value and link weight)
-	numval context_value = rng.getRandomNumval();
-	numval link_weight = rng.getRandomNumval();
+	numval context_value = RNG::getRandomNumval();
+	numval link_weight = RNG::getRandomNumval();
 	inner_nodes[chosen_context_node]->addContextNode(context_value, link_weight);
 	
 	context_node_count++;
@@ -182,13 +179,13 @@ void NeuralNetwork::addCognitiveNode()
 	assert(cognitive_node_count == static_cast<int>(inner_nodes.size()));
 	
 	//Add cognitive node to the network (random threshold)
-	numval threshold_value = rng.getRandomNumval();
+	numval threshold_value = RNG::getRandomNumval();
 	inner_nodes.push_back(new InnerNode(threshold_value));
 	
 	//Initialize link weights to and from node with random values
-	link_weights_from_self_payoff.push_back(rng.getRandomNumval());
-	link_weights_from_other_payoff.push_back(rng.getRandomNumval());
-	link_weights_from_inner_nodes.push_back(rng.getRandomNumval());
+	link_weights_from_self_payoff.push_back(RNG::getRandomNumval());
+	link_weights_from_other_payoff.push_back(RNG::getRandomNumval());
+	link_weights_from_inner_nodes.push_back(RNG::getRandomNumval());
 	
 	cognitive_node_count++;
 }
@@ -202,7 +199,7 @@ void NeuralNetwork::removeNode()
 	
 	//Choose if deleted node is cognitive or context node
 	bool isContextNode = false;
-	if (context_node_count > 0) isContextNode = rng.getRandomBool();
+	if (context_node_count > 0) isContextNode = RNG::getRandomBool();
 	
 	if (isContextNode)
 		removeContextNode();
@@ -227,7 +224,7 @@ void NeuralNetwork::removeCognitiveNode()
 	assert(cognitive_node_count > 0 and cognitive_node_count == static_cast<int>(inner_nodes.size()));
 	
 	//Choose random cognitive node
-	int chosen_cognitive_node = rng.getRandomInt(0, cognitive_node_count-1);
+	int chosen_cognitive_node = RNG::getRandomInt(0, cognitive_node_count-1);
 	
 	//If cognitive node has context node, uncount it
 	cognitive_node_count--;
@@ -250,37 +247,37 @@ void NeuralNetwork::mutate()
 	for (int i=0; i<cognitive_node_count; i++) {
 		///Link weights
 		//From self payoff to inner nodes
-		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-			link_weights_from_self_payoff[i] += rng.getRandomNumval();
+		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+			link_weights_from_self_payoff[i] += RNG::getRandomNumval();
 		}
 		//From other payoff to inner nodes
-		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-			link_weights_from_other_payoff[i] += rng.getRandomNumval();
+		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+			link_weights_from_other_payoff[i] += RNG::getRandomNumval();
 		}
 		//From inner nodes to output
-		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-			link_weights_from_inner_nodes[i] += rng.getRandomNumval();
+		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+			link_weights_from_inner_nodes[i] += RNG::getRandomNumval();
 		}
 		//From context nodes to cognitive nodes
-		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-			inner_nodes[i]->context_link_weight += rng.getRandomNumval();
+		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+			inner_nodes[i]->context_link_weight += RNG::getRandomNumval();
 		}
 		
 		///Node thresholds
 		//Cognitive nodes
-		if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-			inner_nodes[i]->threshold_value += rng.getRandomNumval();
+		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+			inner_nodes[i]->threshold_value += RNG::getRandomNumval();
 		}
 	}
 	
 	//Output node threshold
-	if (rng.getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
-		output_node_threshold += rng.getRandomNumval();
+	if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
+		output_node_threshold += RNG::getRandomNumval();
 	}
 	
 	///Network structure mutations
-	if (rng.getTrueWithProbability(NETWORK_STRUCTURE_MUTATION_PROB)) {
-		if (rng.getRandomBool()) addNode();
+	if (RNG::getTrueWithProbability(NETWORK_STRUCTURE_MUTATION_PROB)) {
+		if (RNG::getRandomBool()) addNode();
 		else removeNode();
 	}
 }
@@ -315,7 +312,7 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 	numval cooperate_prob = sigmoidalSquash(output, output_node_threshold);
 	
 	//If random prob < cooperate prob : cooperate
-	return rng.getTrueWithProbability(cooperate_prob);
+	return RNG::getTrueWithProbability(cooperate_prob);
 }
 
 /*Returns true if it chooses to cooperate by default, false otherwise*/

@@ -53,9 +53,6 @@ class InnerNode
 class NeuralNetwork
 {	
 	private:
-		///Randomness
-		static RNG rng; //random number generator
-	
 		///Neural network structure
 		bool cooperate_by_default; //used for decision-making in first round
 		numval output_node_threshold; //same use as inner nodes thresholds

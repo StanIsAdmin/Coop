@@ -16,17 +16,15 @@ void testNeuralNetwork()
 	
 void testInnerNodes()
 {
-	RNG rng = RNG();
-	
 	///InnerNode class construction
-	numval input = rng.getRandomNumval();
-	numval threshold = rng.getRandomNumval();
+	numval input = RNG::getRandomNumval();
+	numval threshold = RNG::getRandomNumval();
 	InnerNode node(threshold);
 	assert(node(input) == sigmoidalSquash(input, threshold));
 	
 	///InnerNode context addition
-	numval context_value = rng.getRandomNumval();
-	numval link_weight = rng.getRandomNumval();
+	numval context_value = RNG::getRandomNumval();
+	numval link_weight = RNG::getRandomNumval();
 	node.addContextNode(context_value, link_weight);
 	assert(node(input) == sigmoidalSquash(input + (context_value * link_weight), threshold));
 	

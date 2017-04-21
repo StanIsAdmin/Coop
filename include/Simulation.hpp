@@ -18,9 +18,6 @@
 class Simulation
 {
 	private:
-		///Randomness
-		static RNG rng; //random number generator
-		
 		///Game
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 		

@@ -38,7 +38,6 @@ move sequence, then compares it to the pure strategie's move sequences to find w
 class Strategies
 {
 	private:
-		static RNG rng; //random number generator
 		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
 		///Choices sequences

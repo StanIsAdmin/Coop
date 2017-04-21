@@ -1,9 +1,7 @@
 #include "Simulation.hpp"
 
 
-/*Static members*/
-RNG Simulation::rng = RNG();
-
+/*Constructor*/
 Simulation::Simulation(const GamePayoffs& payoffs):
 	game_payoffs(payoffs), //use provided payoffs
 	strats(payoffs), //strategy evaluation class
@@ -80,7 +78,7 @@ void Simulation::playEachOther(int index_a, int index_b)
 	bool player_b_cooperates = player_b();
 	
 	//Play a random number of iterations (mean is 50)
-	int round_iterations = rng.getIterationCount();
+	int round_iterations = RNG::getIterationCount();
 	
 	for (int iteration=0; iteration<round_iterations; ++iteration) {
 		//count each player's cooperations
@@ -137,7 +135,7 @@ void Simulation::nextGeneration()
 {	
 	//select individuals to reproduce with probability proportional to their fitness
 	std::array<int, POPULATION_SIZE> new_population_indexes;
-	rng.selectPopulation<POPULATION_SIZE>(population_fitness.back(), new_population_indexes);
+	RNG::selectPopulation<POPULATION_SIZE>(population_fitness.back(), new_population_indexes);
 	
 	//create the new population with the new selection
 	NeuralNetwork* new_population[POPULATION_SIZE];
