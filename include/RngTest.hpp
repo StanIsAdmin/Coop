@@ -11,6 +11,8 @@
 #define SAMPLE_SIZE 1000
 #define BOOL_GOAL 0.5
 #define BOOL_DIFF 0.1
+#define TRUE_PROB 0.2
+#define TRUE_DIFF 0.05
 #define NUMVAL_GOAL 0
 #define NUMVAL_DIFF 0.1
 #define ITERATIONS_GOAL 50

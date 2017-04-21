@@ -13,6 +13,14 @@ void testRng()
 	true_freq /= SAMPLE_SIZE;
 	assert(fabs(true_freq - BOOL_GOAL) < BOOL_DIFF);
 	
+	///True with given probability
+	true_freq = 0;
+	for (int i=0; i<SAMPLE_SIZE; ++i) {
+		if (RNG::getTrueWithProbability(TRUE_PROB)) true_freq += 1;
+	}
+	true_freq /= SAMPLE_SIZE;
+	assert(fabs(true_freq - TRUE_PROB) < TRUE_DIFF);
+	
 	///Iteration count
 	double avg_iterations = 0;
 	for (int i=0; i<SAMPLE_SIZE; ++i) {
