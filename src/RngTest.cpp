@@ -4,14 +4,6 @@ void testRng()
 {
 	std::cout << "Testing Rng...";
 	
-	///Static seed and generator
-	RNG rng = RNG();
-	RNG rng2 = RNG();
-	assert(rng.getRandomNumval() != rng2.getRandomNumval());
-	
-	rng.setSeed(2);
-	assert(rng2.getSeed() == 2);
-	
 	///Random boolean generation
 	int true_count = 0;
 	for (int i=0; i<1000; ++i) {
@@ -36,4 +28,22 @@ void testRng()
 	average_numval /= 1000;
 	if (average_numval < 0) average_numval *= -1;
 	assert(average_numval < 0.1);
+	
+	///Population selection
+	std::array<double, 1000> fitness;
+	for (int i=0; i<1000; ++i) {
+		if (i < 500) fitness[i] = 0.1;
+		else fitness[i] = 0.9;
+	}
+	
+	std::array<int, 1000> new_pop;
+	RNG::selectPopulation(fitness, new_pop);
+	int lower_pop(0), upper_pop(0);
+	for (int i=0; i<1000; ++i) {
+		if (new_pop[i] > 500) upper_pop++;
+		else lower_pop++;
+	}
+	
+	std::cout << upper_pop << ", " << lower_pop << std::endl;
+	assert(upper_pop > (7 * lower_pop) and upper_pop < (11 * lower_pop));
 }

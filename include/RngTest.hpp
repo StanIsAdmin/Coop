@@ -4,7 +4,10 @@
 #include "Rng.hpp"
 
 #include <iostream>
+#include <array>
 #include <cassert>
+
+#define SAMPLE_SIZE 1000
 
 void testRng();
 
