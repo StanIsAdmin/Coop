@@ -11,7 +11,7 @@ struct GamePayoffs {
 	payoff self_defects_other_cooperates = 0;
 	
 	//Assigns payoffs to both players depending on their choices and the game rules
-	void payoffsFromChoices(bool playerACoops, bool playerBCoops, payoff& playerAPayoff, payoff& playerBPayoff) const;
+	void payoffsFromChoices(bool a_cooperates, bool b_cooperates, payoff& a_payoff, payoff& b_payoff) const;
 };
 
 #endif // PAYOFFS_H
