@@ -241,11 +241,17 @@ void NeuralNetwork::removeCognitiveNode()
 	link_weights_from_inner_nodes.erase(link_weights_from_inner_nodes.begin() + chosen_cognitive_node);
 }
 
+/*
+Mutates the network's numeric values and structure with default probabilities.
+*/
 void NeuralNetwork::mutate()
 {
-	///Numeric values mutations
+	///Default choice
+	if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) 
+		cooperate_by_default = not (cooperate_by_default);
+	
+	///Link weights and inner node thresholds
 	for (int i=0; i<cognitive_node_count; i++) {
-		///Link weights
 		//From self payoff to inner nodes
 		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			link_weights_from_self_payoff[i] += RNG::getRandomNumval();
@@ -263,19 +269,18 @@ void NeuralNetwork::mutate()
 			inner_nodes[i]->context_link_weight += RNG::getRandomNumval();
 		}
 		
-		///Node thresholds
-		//Cognitive nodes
+		//Cognitive nodes thresholds
 		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			inner_nodes[i]->threshold_value += RNG::getRandomNumval();
 		}
 	}
 	
-	//Output node threshold
+	///Output node threshold
 	if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 		output_node_threshold += RNG::getRandomNumval();
 	}
 	
-	///Network structure mutations
+	///Network structure
 	if (RNG::getTrueWithProbability(NETWORK_STRUCTURE_MUTATION_PROB)) {
 		if (RNG::getRandomBool()) addNode();
 		else removeNode();
