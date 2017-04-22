@@ -57,9 +57,7 @@ class NeuralNetwork
 		bool cooperate_by_default; //used for decision-making in first round
 		numval output_node_threshold; //same use as inner nodes thresholds
 		
-		int cognitive_node_count = 0;
-		int context_node_count = 0;
-		
+		int context_node_count = 0; //number of context nodes
 		std::vector<InnerNode*> inner_nodes; //Neural network's hidden layer nodes
 		std::vector<numval> link_weights_from_self_payoff; //link weights between first input and nodes
 		std::vector<numval> link_weights_from_other_payoff; //...between second input and nodes
@@ -91,9 +89,9 @@ class NeuralNetwork
 		
 		void mutate(); //implements all specified mutations with given random probabilities
 		
-		int getInnerNodeCount();
-		int getCognitiveNodeCount();
-		int getContextNodeCount();
+		int getInnerNodeCount()const;
+		int getCognitiveNodeCount() const;
+		int getContextNodeCount() const;
 		
 		bool operator()(payoff self, payoff other); //decide whether to cooperate or defect
 		bool operator()(); //default decision (without input)

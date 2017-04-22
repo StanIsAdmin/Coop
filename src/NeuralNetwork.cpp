@@ -91,43 +91,46 @@ NeuralNetwork::NeuralNetwork():
 NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn):
 	cooperate_by_default(nn.cooperate_by_default),
 	output_node_threshold(nn.output_node_threshold),
-	cognitive_node_count(nn.cognitive_node_count),
 	context_node_count(nn.context_node_count),
 	link_weights_from_self_payoff(nn.link_weights_from_self_payoff),
 	link_weights_from_other_payoff(nn.link_weights_from_other_payoff),
 	link_weights_from_inner_nodes(nn.link_weights_from_inner_nodes)
 {
 	//Create new inner nodes by copying nn's inner nodes
-	for (int i=0; i<nn.cognitive_node_count; ++i) {
+	for (int i=0; i<nn.getCognitiveNodeCount(); ++i) {
 		inner_nodes.push_back(new InnerNode(*nn.inner_nodes[i]));
 	}
+	assert(getCognitiveNodeCount() == nn.getCognitiveNodeCount());
+	assert(getContextNodeCount() == nn.getContextNodeCount());
 	assert(getInnerNodeCount() >= 0 and getInnerNodeCount() <= MAXNODES*2);
 }
 
 /*Destructor*/
 NeuralNetwork::~NeuralNetwork()
 {
-	for (int i=0; i<cognitive_node_count; ++i) {
+	for (int i=0; i<getCognitiveNodeCount(); ++i) {
 		delete inner_nodes[i];
 	}
 }
 
+/*Returns a randomly chosen cognitive node index, with or without context node depending on withContext*/
 int NeuralNetwork::getRandomCognitiveNode(bool withContext)
 {
 	//Find which cognitive nodes have or do not have a context (depending on withContext)
-	std::vector<int> nodeSelection(0);
-	for (int i=0; i<cognitive_node_count; ++i) {
+	std::vector<int> nodeSelection = {};
+	for (int i=0; i<getCognitiveNodeCount(); ++i) {
 		if (inner_nodes[i]->hasContextNode() == withContext)
 			nodeSelection.push_back(i);
 	}
 	
+	int nodeSelectionSize = static_cast<int>(nodeSelection.size());
 	if (withContext)
-		assert(context_node_count == static_cast<int>(nodeSelection.size()));
+		assert(getContextNodeCount() == nodeSelectionSize);
 	else
-		assert(cognitive_node_count - context_node_count == static_cast<int>(nodeSelection.size()));
+		assert(getCognitiveNodeCount() - getContextNodeCount() == nodeSelectionSize);
 	
 	//Choose random cognitive node from the context-free list
-	unsigned int chosen_context_node = nodeSelection[RNG::getRandomInt(0, static_cast<int>(nodeSelection.size())-1)];
+	unsigned int chosen_context_node = nodeSelection[RNG::getRandomInt(0, nodeSelectionSize-1)];
 	
 	assert(inner_nodes[chosen_context_node]->hasContextNode() == withContext);
 	
@@ -143,11 +146,11 @@ void NeuralNetwork::addNode()
 	
 	//Choose if new node is cognitive or context node
 	bool isContextNode;
-	if (cognitive_node_count == MAXNODES) 					//Can't add cognitive node
+	if (getCognitiveNodeCount() == MAXNODES) 					//Can't add cognitive node
 		isContextNode = true;
-	else if (context_node_count == cognitive_node_count)	//Can't add context node
+	else if (getContextNodeCount() == getCognitiveNodeCount())	//Can't add context node
 		isContextNode = false;
-	else 													//Can add either, choose randomly
+	else 														//Can add either, choose randomly
 		isContextNode = RNG::getRandomBool();
 	
 	if (isContextNode) addContextNode();
@@ -158,7 +161,7 @@ void NeuralNetwork::addNode()
 If such a cognitive nodes does not exist, assertion fails.*/
 void NeuralNetwork::addContextNode() 
 {
-	assert(context_node_count < cognitive_node_count);
+	assert(getContextNodeCount() < getCognitiveNodeCount());
 	
 	//Choose random cognitive node that does NOT have context
 	unsigned int chosen_context_node = getRandomCognitiveNode(false);
@@ -167,7 +170,6 @@ void NeuralNetwork::addContextNode()
 	numval context_value = RNG::getRandomNumval();
 	numval link_weight = RNG::getRandomNumval();
 	inner_nodes[chosen_context_node]->addContextNode(context_value, link_weight);
-	
 	context_node_count++;
 }
 
@@ -175,8 +177,7 @@ void NeuralNetwork::addContextNode()
 If the maximum amount of cognitive nodes is already reached, assertion fails.*/
 void NeuralNetwork::addCognitiveNode()
 {
-	assert(cognitive_node_count < MAXNODES);
-	assert(cognitive_node_count == static_cast<int>(inner_nodes.size()));
+	assert(getCognitiveNodeCount() < MAXNODES);
 	
 	//Add cognitive node to the network (random threshold)
 	numval threshold_value = RNG::getRandomNumval();
@@ -186,20 +187,18 @@ void NeuralNetwork::addCognitiveNode()
 	link_weights_from_self_payoff.push_back(RNG::getRandomNumval());
 	link_weights_from_other_payoff.push_back(RNG::getRandomNumval());
 	link_weights_from_inner_nodes.push_back(RNG::getRandomNumval());
-	
-	cognitive_node_count++;
 }
 
 /*If possible, removes a randomly chosen, context or cognitive node from the network. 
 Choice between context and cognitive nodes is random if both choices are allowed*/
 void NeuralNetwork::removeNode()
 {
-	if (cognitive_node_count == 0) //there are no nodes to remove
+	if (getCognitiveNodeCount() == 0) //there are no nodes to remove
 		return;
 	
 	//Choose if deleted node is cognitive or context node
 	bool isContextNode = false;
-	if (context_node_count > 0) isContextNode = RNG::getRandomBool();
+	if (getContextNodeCount() > 0) isContextNode = RNG::getRandomBool();
 	
 	if (isContextNode)
 		removeContextNode();
@@ -209,25 +208,25 @@ void NeuralNetwork::removeNode()
 
 void NeuralNetwork::removeContextNode() 
 {
-	assert(context_node_count > 0 and cognitive_node_count >= context_node_count);
+	assert(getContextNodeCount() > 0 and getCognitiveNodeCount() >= getContextNodeCount());
 	
 	//Get random cognitive node that DOES have a context
 	int chosen_context_node = getRandomCognitiveNode(true);
 	
 	//Remove context node from one cognitive node
 	inner_nodes[chosen_context_node]->removeContextNode();
+	
 	context_node_count--;
 }
 
 void NeuralNetwork::removeCognitiveNode()
 {
-	assert(cognitive_node_count > 0 and cognitive_node_count == static_cast<int>(inner_nodes.size()));
+	assert(getCognitiveNodeCount() > 0);
 	
 	//Choose random cognitive node
-	int chosen_cognitive_node = RNG::getRandomInt(0, cognitive_node_count-1);
+	int chosen_cognitive_node = RNG::getRandomInt(0, getCognitiveNodeCount()-1);
 	
 	//If cognitive node has context node, uncount it
-	cognitive_node_count--;
 	if (inner_nodes[chosen_cognitive_node]->hasContextNode())
 		context_node_count--;
 	
@@ -251,7 +250,7 @@ void NeuralNetwork::mutate()
 		cooperate_by_default = not (cooperate_by_default);
 	
 	///Link weights and inner node thresholds
-	for (int i=0; i<cognitive_node_count; i++) {
+	for (int i=0; i<getCognitiveNodeCount(); i++) {
 		//From self payoff to inner nodes
 		if (RNG::getTrueWithProbability(NETWORK_VALUE_MUTATION_PROB)) {
 			link_weights_from_self_payoff[i] += RNG::getRandomNumval();
@@ -287,15 +286,17 @@ void NeuralNetwork::mutate()
 	}
 }
 
-int NeuralNetwork::getInnerNodeCount()
+int NeuralNetwork::getInnerNodeCount()const
 {
-	return context_node_count + cognitive_node_count;
+	return getCognitiveNodeCount() + getContextNodeCount();
 }
-int NeuralNetwork::getCognitiveNodeCount()
+
+int NeuralNetwork::getCognitiveNodeCount() const
 {
-	return cognitive_node_count;
+	return static_cast<int>(inner_nodes.size());
 }
-int NeuralNetwork::getContextNodeCount()
+
+int NeuralNetwork::getContextNodeCount() const
 {
 	return context_node_count;
 }
@@ -304,11 +305,11 @@ int NeuralNetwork::getContextNodeCount()
 bool NeuralNetwork::operator()(payoff self, payoff other)
 {
 	//If there are no cognitive nodes, use default choice
-	if (cognitive_node_count == 0) return (*this)();
+	if (getCognitiveNodeCount() == 0) return (*this)();
 	
 	//Use inner nodes to compute output
 	numval output = 0;
-	for (int i=0; i<cognitive_node_count; ++i) {
+	for (int i=0; i<getCognitiveNodeCount(); ++i) {
 		numval selfInput = self * link_weights_from_self_payoff[i];
 		numval otherInput = other * link_weights_from_other_payoff[i];
 		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
@@ -329,8 +330,8 @@ bool NeuralNetwork::operator()()
 /*Returns true if both neuralnetworks have the exact same structures and values, false otherwise*/
 bool NeuralNetwork::operator==(const NeuralNetwork& nn)
 {
-	return context_node_count == nn.context_node_count
-		and cognitive_node_count == nn.cognitive_node_count
+	return getContextNodeCount() == nn.getContextNodeCount()
+		and getCognitiveNodeCount() == nn.getCognitiveNodeCount()
 		and cooperate_by_default == nn.cooperate_by_default
 		and output_node_threshold == nn.output_node_threshold
 		and link_weights_from_self_payoff == nn.link_weights_from_self_payoff

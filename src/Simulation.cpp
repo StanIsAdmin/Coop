@@ -77,7 +77,7 @@ void Simulation::playEachOther(int index_a, int index_b)
 	bool player_a_cooperates = player_a();
 	bool player_b_cooperates = player_b();
 	
-	//Play a random number of iterations (mean is 50)
+	//Choose a random number of iterations to play
 	int round_iterations = RNG::getIterationCount();
 	
 	for (int iteration=0; iteration<round_iterations; ++iteration) {
