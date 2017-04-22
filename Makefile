@@ -106,6 +106,16 @@ endif
 all: $(program_NAME)
 
 
+# In debug versions, use -g option to provide debugging information
+debug: CPPFLAGS += -g
+debug: $(program_NAME)
+
+
+# In released executable, disable asserts and optimize as much as possible
+release: CPPFLAGS += -DNDEBUG -O3
+release: $(program_NAME)
+
+
 # The program depends on the object files
 # The build rule $(LINK.cc) is used to link the object files and output a file with the same name as the program. LINK.cc makes use of CXX,CXXFLAGS,CPPFLAGS,LDFLAGS,TARGET_ARCH.
 # For more info on LINK, do 'make -p | grep LINK'
