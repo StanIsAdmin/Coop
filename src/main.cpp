@@ -28,6 +28,10 @@ int main(int argc, char** argv)
 		//number of test rounds
 		unsigned test_rounds = (argc == 3) ? strtou(argv[2]) : 1;
 		
+		#ifdef NDEBUG
+		std::cerr << "Cannot run tests with NDEBUG option, please remove it" << std::endl;
+		return 1;
+		#endif
 		runTests(test_rounds);
 	}
 	//run application
