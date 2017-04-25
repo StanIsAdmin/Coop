@@ -2,13 +2,11 @@
 #include <cstring>
 #include <ctime>
 
-#include "Rng.hpp"
-#include "RngTest.hpp"
-#include "NeuralNetwork.hpp"
-#include "NeuralNetworkTest.hpp"
 #include "Simulation.hpp"
-#include "Payoffs.hpp"
+#include "RngTest.hpp"
+#include "StrategiesTest.hpp"
 #include "PayoffsTest.hpp"
+#include "NeuralNetworkTest.hpp"
 
 void runTests(unsigned test_rounds);
 void runSimulation(unsigned sim_rounds, std::string game_type);
@@ -61,6 +59,7 @@ void runTests(unsigned test_rounds)
 		std::cout << "- round " << round+1 << "/" << test_rounds << std::endl;
 		testRng();
 		testPayoffs();
+		testStrategies();
 		testNeuralNetwork();
 	}
 	

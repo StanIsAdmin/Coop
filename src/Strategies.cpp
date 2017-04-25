@@ -14,8 +14,8 @@ Each assessment is made of 20 moves (a move is a decision -cooperate or defect- 
 The network's moves will be compared to these moves to determine which is their closest pure strategy.*/
 void Strategies::initStrategies()
 {
-	double coop_prob = 0;
-	bool strat_cooperates, prev_pavlov_choice;
+	double coop_prob = 0; //Cooperation probability of virtual opponent
+	bool strat_cooperates; //Decision of strategy against virtual opponent
 	
 	for (int assessment_index=0; assessment_index<ASSESSMENT_COUNT; ++assessment_index){
 		//Initialize cooperation counts
@@ -27,14 +27,14 @@ void Strategies::initStrategies()
 		for (int prev_choice_index=0; prev_choice_index<ASSESSMENT_PREV_CHOICES; ++prev_choice_index) {
 			opponent_choices[assessment_index][prev_choice_index] = RNG::getTrueWithProbability(coop_prob);
 		}
-		prev_pavlov_choice = RNG::getTrueWithProbability(coop_prob); //Init previous choice for pavlov strategy
+		
+		//Initialize previous choice for pavlov strategy
+		bool prev_pavlov_choice = RNG::getTrueWithProbability(coop_prob); 
 		
 		for (int iteration=ASSESSMENT_PREV_CHOICES; iteration<ASSESSMENT_SIZE + ASSESSMENT_PREV_CHOICES; ++iteration) {
-			//The "virtual opponent" used to assess the network chooses to cooperate randomly with probability coop_prob
+			//The "virtual opponent" used to assess the network chooses to cooperate randomly
+			//(with probability coop_prob)
 			opponent_choices[assessment_index][iteration] = RNG::getTrueWithProbability(coop_prob);
-			
-			//Always cooperate/defect strategies do not depend on the "virtual opponent"'s choice
-			strats_avg_coop[STRATEGIES_ALWAYS_COOPERATE][assessment_index] += 1;
 			
 			//Tit-for-tat imitates the opponent's previous decision (first choice is random)
 			strat_cooperates = opponent_choices[assessment_index][iteration-1];
@@ -51,7 +51,8 @@ void Strategies::initStrategies()
 		}
 		
 		//Transform cooperation counts into averages
-		strats_avg_coop[STRATEGIES_ALWAYS_COOPERATE][assessment_index] /= ASSESSMENT_SIZE;
+		strats_avg_coop[STRATEGIES_ALWAYS_DEFECT][assessment_index] = 0;
+		strats_avg_coop[STRATEGIES_ALWAYS_COOPERATE][assessment_index] = 1;
 		strats_avg_coop[STRATEGIES_TIT_FOR_TAT][assessment_index] /= ASSESSMENT_SIZE;
 		strats_avg_coop[STRATEGIES_TIT_FOR_TWO_TATS][assessment_index] /= ASSESSMENT_SIZE;
 		strats_avg_coop[STRATEGIES_PAVLOV_LIKE][assessment_index] /= ASSESSMENT_SIZE;
@@ -99,14 +100,15 @@ int Strategies::compareChoices()
 {
 	double current_score; //score of similarity between player and current "pure strategy"
 	double best_score = -1; //score for closest pure strategy found so far
-	int best_strat_index = -1; //index of best strat found so far
+	int best_strat_index = -1; //index of closest pure strategy found so far
 	
 	for (int strat_index=0; strat_index<STRATEGIES_COUNT; strat_index++) {
-		std::array<double, ASSESSMENT_COUNT>& currStrat = strats_avg_coop[strat_index]; //current "pure strategy"
+		//current pure strategy being compared to player's strategy
+		std::array<double, ASSESSMENT_COUNT>& current_strat = strats_avg_coop[strat_index];
 		current_score = 0;
 		
 		for (int assessment_index=0; assessment_index<ASSESSMENT_COUNT; ++assessment_index) {
-			current_score += pow(currStrat[assessment_index] - player_avg_coop[assessment_index], 2);
+			current_score += pow(current_strat[assessment_index] - player_avg_coop[assessment_index], 2);
 		}
 		
 		if (current_score < best_score or best_score < 0) {
@@ -114,5 +116,6 @@ int Strategies::compareChoices()
 			best_strat_index = strat_index;
 		}
 	}
+	
 	return best_strat_index;
 }

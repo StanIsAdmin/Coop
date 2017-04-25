@@ -40,7 +40,6 @@ class Strategies
 	private:
 		const Payoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
-		///Choices sequences
 		//random choices used for assessment
 		bool opponent_choices[ASSESSMENT_COUNT][ASSESSMENT_SIZE + ASSESSMENT_PREV_CHOICES];
 		
