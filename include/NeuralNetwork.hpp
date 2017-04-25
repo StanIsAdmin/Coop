@@ -1,8 +1,6 @@
 #ifndef NEURALNETWORK_H
 #define NEURALNETWORK_H
 
-// #define NDEBUG //TODO: use in release version
-
 #include <cmath>
 #include <iostream>
 #include <cassert>
@@ -27,16 +25,17 @@ class InnerNode
 	friend class NeuralNetwork;
 	
 	private:
+		numval threshold_value;	//used by the squashing function of the cognitive node	
+		
 		bool has_context_node = false; //is a context node attached ?
 		numval context_value = 0; //the context value acts as a memory
 		numval context_link_weight = 0; //multiplicator for input from context node
-		numval threshold_value;	//used by the squashing function of the cognitive node	
 	
 	public:
 		///Constructors
 		InnerNode() = delete; //threshold needs to be provided
 		InnerNode(numval threshold); //creates a cognitive node without a context node
-		InnerNode(const InnerNode&) = default;
+		InnerNode(const InnerNode& in); //copy constructor
 		
 		//set values for associated context node (creates context node if needed)
 		bool hasContextNode(); //does the cognitive node has associated context node

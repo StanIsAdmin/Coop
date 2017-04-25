@@ -30,7 +30,7 @@ void testInnerNodes()
 	
 	///InnerNode copy
 	InnerNode node2(node);
-	assert(node2(input) == node(input));
+	assert(node2 == node);
 	
 	///InnerNode context removal
 	node.removeContextNode();

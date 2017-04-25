@@ -17,6 +17,15 @@ InnerNode::InnerNode(numval threshold):
 	threshold_value(threshold)
 	{}
 	
+/*Copy constructor*/
+InnerNode::InnerNode(const InnerNode& in):
+	threshold_value(in.threshold_value),
+	has_context_node(in.has_context_node),
+	context_link_weight(in.context_link_weight)
+	//context value (node's memory) is not inherited
+	{}
+
+/*True if the cognitive node has an associated context node.*/
 bool InnerNode::hasContextNode()
 {
 	return has_context_node;
@@ -61,11 +70,11 @@ numval InnerNode::operator()(numval input)
 	return input;
 }
 
-/*True if both inner nodes have the same context node value, context link weight and threshold value*/
+/*True if both inner nodes have the same threshold value, number of context nodes 
+and context link weight (context value is not compared).*/
 bool InnerNode::operator==(const InnerNode& in)
 {
 	return has_context_node == in.has_context_node
-		and context_value == in.context_value
 		and context_link_weight == in.context_link_weight
 		and threshold_value == in.threshold_value;
 }
