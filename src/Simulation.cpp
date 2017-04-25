@@ -2,7 +2,7 @@
 
 
 /*Constructor*/
-Simulation::Simulation(const GamePayoffs& payoffs):
+Simulation::Simulation(const Payoffs& payoffs):
 	game_payoffs(payoffs), //use provided payoffs
 	strats(payoffs), //strategy evaluation class
 	nn_population(), //nullptr array

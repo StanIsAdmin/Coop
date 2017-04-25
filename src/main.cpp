@@ -1,12 +1,14 @@
+#include <iostream>
+#include <cstring>
+#include <ctime>
+
 #include "Rng.hpp"
 #include "RngTest.hpp"
 #include "NeuralNetwork.hpp"
 #include "NeuralNetworkTest.hpp"
 #include "Simulation.hpp"
-
-#include <iostream>
-#include <cstring>
-#include <ctime>
+#include "Payoffs.hpp"
+#include "PayoffsTest.hpp"
 
 void runTests(unsigned test_rounds);
 void runSimulation(unsigned sim_rounds, std::string game_type);
@@ -58,6 +60,7 @@ void runTests(unsigned test_rounds)
 	for (unsigned round=0; round<test_rounds; ++round) {
 		std::cout << "- round " << round+1 << "/" << test_rounds << std::endl;
 		testRng();
+		testPayoffs();
 		testNeuralNetwork();
 	}
 	
@@ -65,27 +68,9 @@ void runTests(unsigned test_rounds)
 }
 
 void runSimulation(unsigned sim_rounds, std::string game_type)
-{	
-	GamePayoffs sim_payoffs{};
-	
-	//Iterated Prisoner's Game
-	if (game_type == "IPD") {
-		sim_payoffs.both_cooperate = 6;
-		sim_payoffs.both_defect = 2;
-		sim_payoffs.self_defects_other_cooperates = 7;
-		sim_payoffs.self_cooperates_other_defects = 1;
-	}
-	//Iterated Snowdrift Game
-	else if (game_type == "ISD") {
-		sim_payoffs.both_cooperate = 5;
-		sim_payoffs.both_defect = 1;
-		sim_payoffs.self_defects_other_cooperates = 8;
-		sim_payoffs.self_cooperates_other_defects = 2;
-	}
-	else {
-		std::cerr << "Error: unknown game" << std::endl;
-		return;
-	}
+{
+	//get payoffs to use during simulation
+	const Payoffs sim_payoffs = Payoffs::getPayoffsForGameType(game_type);
 	
 	//output simulation details
 	std::cout << "# Game: " << game_type << std::endl;

@@ -19,7 +19,7 @@ class Simulation
 {
 	private:
 		///Game
-		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
+		const Payoffs& game_payoffs; //payoffs to use depending on game outcomes
 		
 		///Strategy evaluation
 		Strategies strats; //pure strategy evaluator
@@ -56,7 +56,7 @@ class Simulation
 		void outputResults(); //prints the simulation results
 	
 	public:
-		Simulation(const GamePayoffs& payoffs); //ctr
+		Simulation(const Payoffs& payoffs);
 		
 		void run(unsigned int generations); //run the simulation for n generations
 };

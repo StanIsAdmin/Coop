@@ -38,7 +38,7 @@ move sequence, then compares it to the pure strategie's move sequences to find w
 class Strategies
 {
 	private:
-		const GamePayoffs& game_payoffs; //payoffs to use depending on game outcomes
+		const Payoffs& game_payoffs; //payoffs to use depending on game outcomes
 	
 		///Choices sequences
 		//random choices used for assessment
@@ -53,7 +53,7 @@ class Strategies
 		int compareChoices(); //compares the player's choices to each pure strategy
 		
 	public:
-		Strategies(const GamePayoffs& payoffs);
+		Strategies(const Payoffs& payoffs);
 		
 		//returns the player's closest pure strategy
 		int closestPureStrategy(NeuralNetwork& player);

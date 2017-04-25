@@ -2,7 +2,7 @@
 
 
 /*Constructor*/
-Strategies::Strategies(const GamePayoffs& payoffs) :
+Strategies::Strategies(const Payoffs& payoffs) :
 	game_payoffs(payoffs)
 {
 	initStrategies();

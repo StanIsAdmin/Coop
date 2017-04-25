@@ -1,6 +1,5 @@
 #include "NeuralNetworkTest.hpp"
 
-
 void testInnerNodes();
 void testNetwork();
 

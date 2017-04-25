@@ -2,7 +2,7 @@
 
 
 /*Assigns payoffs to both players depending on their choices and the game rules*/
-void GamePayoffs::payoffsFromChoices(bool a_cooperates, bool b_cooperates, payoff& a_payoff, payoff& b_payoff) const
+void Payoffs::payoffsFromChoices(bool a_cooperates, bool b_cooperates, payoff& a_payoff, payoff& b_payoff) const
 {
 	//both cooperate
 	if (a_cooperates && b_cooperates)  {
@@ -24,4 +24,31 @@ void GamePayoffs::payoffsFromChoices(bool a_cooperates, bool b_cooperates, payof
 		a_payoff = both_defect;
 		b_payoff = both_defect;
 	}
+}
+
+Payoffs Payoffs::getPayoffsForGameType(std::string game_type)
+{
+	Payoffs game_payoffs = {};
+	
+	//Iterated Prisoner's Game
+	if (game_type == "IPD") {
+		game_payoffs.both_cooperate = IPD_BOTH_COOPERATE;
+		game_payoffs.both_defect = IPD_BOTH_DEFECT;
+		game_payoffs.self_defects_other_cooperates = IPD_SELF_DEFECTS;
+		game_payoffs.self_cooperates_other_defects = IPD_SELF_COOPERATES;
+	}
+	
+	//Iterated Snowdrift Game
+	else if (game_type == "ISD") {
+		game_payoffs.both_cooperate = ISD_BOTH_COOPERATE;
+		game_payoffs.both_defect = ISD_BOTH_DEFECT;
+		game_payoffs.self_defects_other_cooperates = ISD_SELF_DEFECTS;
+		game_payoffs.self_cooperates_other_defects = ISD_SELF_COOPERATES;
+	}
+	
+	else {
+		throw std::invalid_argument("GamePayoffs: unknown game type");
+	}
+	
+	return game_payoffs;
 }
