@@ -92,7 +92,7 @@ class NeuralNetwork
 		int getCognitiveNodeCount() const;
 		int getContextNodeCount() const;
 		
-		bool operator()(payoff self, payoff other); //decide whether to cooperate or defect
+		bool operator()(payoff self_payoff, payoff other_payoff); //decide whether to cooperate or defect
 		bool operator()(); //default decision (without input)
 		
 		bool operator==(const NeuralNetwork& nn);

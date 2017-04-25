@@ -302,7 +302,11 @@ int NeuralNetwork::getInnerNodeCount()const
 
 int NeuralNetwork::getCognitiveNodeCount() const
 {
-	return static_cast<int>(inner_nodes.size());
+	int size = static_cast<int>(inner_nodes.size());
+	assert (size == static_cast<int>(link_weights_from_inner_nodes.size()) and
+		size == static_cast<int>(link_weights_from_other_payoff.size()) and
+		size ==	static_cast<int>(link_weights_from_self_payoff.size()));
+	return size;
 }
 
 int NeuralNetwork::getContextNodeCount() const
@@ -311,7 +315,7 @@ int NeuralNetwork::getContextNodeCount() const
 }
 
 /*Returns true if it chooses to cooperate based on the input, false otherwise*/
-bool NeuralNetwork::operator()(payoff self, payoff other)
+bool NeuralNetwork::operator()(payoff self_payoff, payoff other_payoff)
 {
 	//If there are no cognitive nodes, use default choice
 	if (getCognitiveNodeCount() == 0) return (*this)();
@@ -319,14 +323,14 @@ bool NeuralNetwork::operator()(payoff self, payoff other)
 	//Use inner nodes to compute output
 	numval output = 0;
 	for (int i=0; i<getCognitiveNodeCount(); ++i) {
-		numval selfInput = self * link_weights_from_self_payoff[i];
-		numval otherInput = other * link_weights_from_other_payoff[i];
-		output += (*inner_nodes[i])(selfInput + otherInput) * link_weights_from_inner_nodes[i];
+		numval self_input = self_payoff * link_weights_from_self_payoff[i];
+		numval other_input = other_payoff * link_weights_from_other_payoff[i];
+		output += (*inner_nodes[i])(self_input + other_input) * link_weights_from_inner_nodes[i];
 	}
 	//Squash output into collaboration probability
 	numval cooperate_prob = sigmoidalSquash(output, output_node_threshold);
 	
-	//If random prob < cooperate prob : cooperate
+	//Cooperate with probability cooperate_prob
 	return RNG::getTrueWithProbability(cooperate_prob);
 }
 
