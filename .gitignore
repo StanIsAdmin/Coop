@@ -1,7 +1,12 @@
 bin/
 out/
 nbproject/
+
+# Visual Studio files
 .vs/
+*.sln
+*.vcxproj
+*.filters
 
 # Compiled Object files
 *.slo
