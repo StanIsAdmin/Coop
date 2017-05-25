@@ -1,11 +1,11 @@
 function analyse(file_base, file_count)
-  #Filename details
+  %Filename details
   [file_path, file_name, file_extension] = fileparts(file_base);
   
-  #GNUplot toolkit is better toolkit
+  %GNUplot toolkit is better toolkit
   graphics_toolkit gnuplot
   
-  #All-simulations data
+  %All-simulations data
   all_generations = [];
   all_pop_intelligence = [];
   all_avg_intelligence = [];
@@ -15,28 +15,30 @@ function analyse(file_base, file_count)
   all_strategies_count = [];
   all_selection_for_intelligence = [];
   
-  #For each simulation
+  %For each simulation
   for file_index = 1:file_count
-    #Load simulation data and
-    load([file_name, int2str(file_index), file_extension]);
+    %Load simulation data and
+    full_name = [file_name, int2str(file_index), file_extension];
+    load(full_name)
     
-    #Number of generations
-    generations = size(pop_intelligence)(1);
+    %Number of generations
+    generations = size(pop_intelligence);
+    generations = generations(1);
     
-    #Pool together tit-for-tat and tit-for-two tats strategies
-    strategies_count = [strategies_count(:,1:2) (strategies_count(:,3) .+ strategies_count(:,4)) strategies_count(:,5)];
+    %Pool together tit-for-tat and tit-for-two tats strategies
+    strategies_count = [strategies_count(:,1:2) (strategies_count(:,3) + strategies_count(:,4)) strategies_count(:,5)];
     
-    #Calculate average population intelligence and fitness
+    %Calculate average population intelligence and fitness
     avg_intelligence = mean(pop_intelligence, 2);
     avg_fitness = mean(pop_fitness, 2);
     
-    #Calculate selection for intelligence as covariance between population intelligence and average population fitness
+    %Calculate selection for intelligence as covariance between population intelligence and average population fitness
     selection_for_intelligence = zeros(generations,1);
     for row_index = 1:generations
       selection_for_intelligence(row_index) = cov(pop_intelligence(row_index,:), pop_fitness(row_index,:)) / avg_fitness(row_index);
     end
     
-    #Append simulation data to all-simulations data
+    %Append simulation data to all-simulations data
     all_generations = [all_generations; generations];
     all_pop_intelligence = [all_pop_intelligence; pop_intelligence];
     all_avg_intelligence = [all_avg_intelligence; avg_intelligence];
@@ -46,7 +48,7 @@ function analyse(file_base, file_count)
     all_strategies_count = [all_strategies_count; strategies_count];
     all_selection_for_intelligence = [all_selection_for_intelligence; selection_for_intelligence];
     
-    #Plot simulation data
+    %Plot simulation data
     simulation_file_name = [file_name, int2str(file_index)];
     plotSimulationIntelligence(simulation_file_name, avg_intelligence);
     plotSimulationCooperation(simulation_file_name, cooperation_freq);
@@ -54,18 +56,18 @@ function analyse(file_base, file_count)
     plotSimulationStrategies(simulation_file_name, strategies_count);
   end
   
-  #Plot total data
+  %Plot total data
   file_name = [file_name "0-" int2str(file_count)];
   plotCooperationByIntelligence(file_name, all_avg_intelligence, all_cooperation_freq);
   plotStrategiesSelection(file_name, all_pop_intelligence, all_avg_intelligence, all_pop_fitness, all_avg_fitness, all_cooperation_freq, all_strategies_count);
   plotTransitionsToCooperation(file_name, all_generations, all_cooperation_freq, all_selection_for_intelligence);
   
-  #Correlation between cooperation and intelligence
+  %Correlation between cooperation and intelligence
   spearman_cooperation_intelligence = spearman(all_avg_intelligence, all_cooperation_freq)
 end
 
 
-#Average generation intelligence
+%Average generation intelligence
 function plotSimulationIntelligence(file_name, avg_intelligence)
   figure('visible','off');
   plot(avg_intelligence)
@@ -77,7 +79,7 @@ function plotSimulationIntelligence(file_name, avg_intelligence)
   close
 end
 
-#Cooperation frequency in generation's games
+%Cooperation frequency in generation's games
 function plotSimulationCooperation(file_name, avg_cooperation)
   figure('visible','off');
   plot(avg_cooperation)
@@ -89,7 +91,7 @@ function plotSimulationCooperation(file_name, avg_cooperation)
   close
 end
 
-#Selection for intelligence per generation
+%Selection for intelligence per generation
 function plotSimulationSelectionForIntelligence(file_name, selection_for_intelligence);
   figure('visible','off');
   plot(selection_for_intelligence)
@@ -101,7 +103,7 @@ function plotSimulationSelectionForIntelligence(file_name, selection_for_intelli
   close
 end
 
-#Strategies usage per generation
+%Strategies usage per generation
 function plotSimulationStrategies(file_name, strategies_count)  
   figure('visible','off');
   h = area(strategies_count);
@@ -117,7 +119,7 @@ function plotSimulationStrategies(file_name, strategies_count)
   close
 end
 
-#Cooperation per mean intelligence
+%Cooperation per mean intelligence
 function plotCooperationByIntelligence(file_name, avg_intelligence, cooperation_freq)
   intelligence_level_max = 20;
   intelligence_level_precision = 2;
@@ -128,19 +130,22 @@ function plotCooperationByIntelligence(file_name, avg_intelligence, cooperation_
   level_min_coop = zeros(1, intelligence_level_categories);
   level_max_coop = zeros(1, intelligence_level_categories);
   
-  for index = 1:size(cooperation_freq)(1)
+  generations = size(cooperation_freq);
+  generations = generations(1);
+  
+  for index = 1:generations
     intelligence_level = round(avg_intelligence(index)*intelligence_level_precision) + 1;
     cooperation_level = cooperation_freq(index);
-    level_sum_coop(intelligence_level) += cooperation_level;
-    level_count_coop(intelligence_level) += 1;
+    level_sum_coop(intelligence_level) = level_sum_coop(intelligence_level) + cooperation_level;
+    level_count_coop(intelligence_level) = level_count_coop(intelligence_level) + 1;
     level_min_coop(intelligence_level) = min([level_min_coop(intelligence_level) cooperation_level]);
     level_max_coop(intelligence_level) = max([level_max_coop(intelligence_level) cooperation_level]);
   end
   
-  level_x_axis = [0:1.0/intelligence_level_precision:intelligence_level_max];
+  level_x_axis = (0:1.0/intelligence_level_precision:intelligence_level_max);
   level_avg_coop = level_sum_coop ./ level_count_coop;
-  level_neg_coop = level_avg_coop .- level_min_coop;
-  level_pos_coop = level_max_coop .- level_avg_coop;
+  level_neg_coop = level_avg_coop - level_min_coop;
+  level_pos_coop = level_max_coop - level_avg_coop;
   
   figure('visible','off');
   errorbar(level_x_axis, level_avg_coop, level_neg_coop, level_pos_coop, 'o')
@@ -152,9 +157,10 @@ function plotCooperationByIntelligence(file_name, avg_intelligence, cooperation_
   close
 end
 
-#Correlation between strategy frequency and selection for intelligence
+%Correlation between strategy frequency and selection for intelligence
 function plotStrategiesSelection(file_name, pop_intelligence, avg_intelligence, pop_fitness, avg_fitness, cooperation_freq, strategies_count)
-  generations = size(avg_intelligence)(1);
+  generations = size(avg_intelligence);
+  generations = generations(1);
   
   selection_for_intelligence_all = zeros(generations,1);
   selection_for_intelligence_low = [];
@@ -207,9 +213,10 @@ function plotStrategiesSelection(file_name, pop_intelligence, avg_intelligence, 
   close
 end
 
-#Selection for intelligence and transitions to cooperation
+%Selection for intelligence and transitions to cooperation
 function plotTransitionsToCooperation(file_name, generations_count, cooperation_freq, selection_for_intelligence)
-  total_simulations = size(generations_count)(1);
+  total_simulations = size(generations_count);
+  total_simulations = total_simulations(1);
   total_generations = 0;
   
   cooperation_average = [];
@@ -220,10 +227,10 @@ function plotTransitionsToCooperation(file_name, generations_count, cooperation_
     sim_generations = generations_count(sim_index);
     cooperation_average = [cooperation_average; cooperation_freq(total_generations+2 : total_generations+sim_generations, :)];
     cooperation_selection = [cooperation_selection; selection_for_intelligence(total_generations+2 : total_generations+sim_generations, :)];
-    cooperation_change = [cooperation_change;
-      cooperation_freq(total_generations+2 : total_generations+sim_generations, :) .- ...
+    cooperation_change = [cooperation_change; ...
+      cooperation_freq(total_generations+2 : total_generations+sim_generations, :) - ...
       cooperation_freq(total_generations+1 : total_generations+sim_generations-1, :)];
-    total_generations += sim_generations;
+    total_generations = total_generations + sim_generations;
   end
 
   coop_avg_min = min(cooperation_average);
@@ -246,8 +253,8 @@ function plotTransitionsToCooperation(file_name, generations_count, cooperation_
     coop_change_current = cooperation_change(index);
     y_current = round(((coop_change_current - coop_change_min) / coop_change_diff) * precision) + 1;
     
-    Z_values(y_current, x_current) += cooperation_selection(index);
-    Z_counts(y_current, x_current) += 1;
+    Z_values(y_current, x_current) = Z_values(y_current, x_current) + cooperation_selection(index);
+    Z_counts(y_current, x_current) = Z_counts(y_current, x_current) + 1;
   end
   Z_averages = Z_values ./ Z_counts;
   Z_averages(isnan(Z_averages)) = 0;
