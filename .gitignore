@@ -1,6 +1,7 @@
 bin/
 out/
 nbproject/
+.vs/
 
 # Compiled Object files
 *.slo
